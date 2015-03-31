@@ -1,0 +1,9 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<widget xmlns = "http://www.w3.org/ns/widgets" id = "http://www.example.org/helloworld"> <!-- need to change the id -->
+	<name>Roatta Waaayyyy! Chess Extension For Opera</name>
+	<description>Chess PGN/FEN viewer for Opera. This application can be used to play PGN games, FEN positions and to record chess games</description>
+  	<author  href = "yourURL" email = "armagedescu@gmail.com">Ion Filipski</author> <!-- need to change the href -->
+  	<icon    src  = "icons/roatta.png"/>
+    <content src  = "roatta_start.html"/> <!-- if not specified, then defaults to index.html -->
+    <feature name = "opera:contextmenus"/>
+</widget>

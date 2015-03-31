@@ -1,0 +1,63 @@
+<?XML version="1.0"?>
+<package>
+<?component error="true" debug="true"?>
+
+   <comment>
+      This skeleton shows how script component elements are 
+      assembled into a .wsc file.
+   </comment>
+
+   <component id="MyScriptlet">
+      <registration
+            progid="IVFChess.IEAddOn"
+            description="description"
+            version="1.0.0.1"
+            clsid="{81790022-3D39-4521-AB0C-3E4CDEC85D7C}">
+         <script language="JScript">
+         <![CDATA[
+            //{39FDAEB3-30F8-42b7-9FE7-39DD0EFCA4D8} extension GUID
+            //CLSID_Shell_ToolbarExtExec {1FBA04EE-3024-11d2-8F1F-0000F87ABD16}
+            //HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Explorer\Extensions\{39FDAEB3-30F8-42b7-9FE7-39DD0EFCA4D8}\@ClsidExtension=clsid:{81790022-3D39-4521-AB0C-3E4CDEC85D7C}
+            //HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Explorer\Extensions\{39FDAEB3-30F8-42b7-9FE7-39DD0EFCA4D8}\{1FBA04EE-3024-11d2-8F1F-0000F87ABD16}
+            function Register()
+            {
+               shell = new ActiveXObject("WScript.Shell");
+               shell.Popup("Register");
+            }
+            function Unregister()
+            {
+               shell = new ActiveXObject("WScript.Shell");
+               shell.Popup("Unregister");               
+            }
+         ]]>
+         </script>
+      </registration>
+
+      <!-- reference object="IVFChess.IEAddOn" / -->
+
+      <public>
+         <property name="propertyname"/>
+         <method name="methodname"/>
+         <event name="eventname"/>
+      </public>
+      <script language="JScript">
+      <![CDATA[
+         function get_propertyname()
+         { // Script here.
+         }
+         function put_propertyname(newValue)
+         { // Script here.
+            fireEvent("eventname");
+         }
+         function methodname()
+         {
+         }
+      ]]>
+      </script>
+      <object id="IVFChess.IEAddOn" classid="{81790022-3D39-4521-AB0C-3E4CDEC85D7C}" />
+      <!-- resource ID="IDR_STRING1">Chess for everyone</resource>
+      <resource ID="IDR_STRING2">Chess for me</resource -->
+
+   </component>
+
+</package>

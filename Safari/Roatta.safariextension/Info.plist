@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>armagedescu</string>
+	<key>Builder Version</key>
+	<string>534.57.2</string>
+	<key>CFBundleDisplayName</key>
+	<string>Roatta Waaayyy!!!!</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.RoattaSoftwareMoldova.safari.RoattaChess</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Context Menu Items</key>
+		<array>
+			<dict>
+				<key>Command</key>
+				<string>menuCommandPlayRoattaBoard_mini18</string>
+				<key>Identifier</key>
+				<string>mini18</string>
+				<key>Title</key>
+				<string>Roatta mini board</string>
+			</dict>
+			<dict>
+				<key>Command</key>
+				<string>menuCommandPlayRoattaBoard_medium35</string>
+				<key>Identifier</key>
+				<string>medium35</string>
+				<key>Title</key>
+				<string>Roatta medium board</string>
+			</dict>
+		</array>
+		<key>Global Page</key>
+		<string>global.html</string>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>Start</key>
+			<array>
+				<string>inject.js</string>
+			</array>
+		</dict>
+	</dict>
+	<key>Description</key>
+	<string>Chess PGN extension for Opera</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>All</string>
+		</dict>
+	</dict>
+	<key>Update Manifest URL</key>
+	<string>http://roattawaayyyy.googlecode.com/files/update_manifest.plist</string>
+	<key>Website</key>
+	<string>https://sites.google.com/site/armagedescu/1</string>
+</dict>
+</plist>

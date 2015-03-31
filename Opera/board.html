@@ -1,0 +1,51 @@
+<html>
+<head>
+   <style type='text/css'>img {position:relative}</style>
+</head>
+<body>
+   <div id="chess_div" >
+      <table border = '0' cellpadding = '1' cellspacing = '0'>
+         <tr><td border = '1'>             <!-- TODO: Apply special  bgcolor = '#808080'  to flip board TR -->
+            <div id = 'chess_board'></div> <!-- this is mai board div -->
+         </td></tr>
+      </table>
+      <table border='0' cellpadding='0' cellspacing='0'>
+         <tr>
+            <td style = 'width:14px'><input type = 'button' value = 'I&lt;' id = 'btnInit'        /></td>
+            <td style = 'width:14px'><input type = 'button' value = '&lt;'  id = 'btnMoveBack'    /></td>
+            <td style = 'width:14px'><input type = 'button' value = '&gt;'  id = 'btnMoveForward' /></td>
+            <td style = 'width:14px'><input type = 'button' value = '&gt;I' id = 'btnMoveLast'    /></td>
+            <td style = 'width:19px'><input type = 'button' value = 'Play'  id = 'btnPlay'        /></td>
+         </tr>
+      </table>
+      <!-- div id="divExperimental" style="visibility:show" -->
+      <div id="divExperimental" style="visibility:hidden" >
+         Experimental:<br/>
+         <input type='text' name='Position' id='Position' value='' size='8' /><br />
+         <input type="text"   value=""              name="FEN"   id="FEN"              size="34"  />
+         <input type="button" value="Get"                        id = "btnGetFEN"                 />
+         <input type="button" value="Show FEN list"              id = "btnShowFENList"            />
+      </div>
+   </div><br />
+   <div id="error_div" style="visibility:hidden" ></div><br />
+   <!-- div id="error_div" style="visibility:show" ></div><br / -->
+   <!-- TODO: what is "Miniboard" for? -->
+   <!-- a name="Miniboard"></a -->
+
+   <!-- TODO: what is the "BoardForm" for, this is simulator, possible better to be removed? -->
+   <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+         <td>
+         <form name="BoardForm">
+            <!-- input type=hidden name=PgnMoveText  value=""/ -->
+            <table border="0" cellpadding="0" cellspacing="0">
+               <tr><td></td></tr>
+            </table>
+         </form>
+      </td></tr>
+   </table>
+   <script language="JavaScript" src="pgn_parsers_main.js"></script>
+   <script language="JavaScript" src="board_main.js"></script>
+   <script language="JavaScript" src="opera_listener.js"></script>
+</body>
+</html>

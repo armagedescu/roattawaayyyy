@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+   <key>Extension Updates</key>
+   <array>
+     <dict>
+       <key>CFBundleIdentifier</key>
+       <string>com.RoattaSoftwareMoldova.safari.RoattaChess</string>
+       <key>Developer Identifier</key>
+       <string>DM4988ZE3L</string>
+       <key>CFBundleVersion</key>
+       <string>1</string>
+       <key>CFBundleShortVersionString</key>
+       <string>1.0</string>
+       <key>URL</key>
+       <string>http://roattawaayyyy.googlecode.com/files/Roatta.safariextz</string>
+     </dict>
+   </array>
+</dict>
+</plist>
+<!-- 
+Safari Developer: (DM4988ZE3L) armagedescu@gmail.com
+YourCertificateID for the update manifest is: DM4988ZE3L
+-->

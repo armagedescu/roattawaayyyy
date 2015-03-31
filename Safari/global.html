@@ -1,0 +1,35 @@
+<html>
+<head>
+   <title></title>
+   <script language="JavaScript">
+   
+    safari.application.addEventListener("command", roattaGlobalCommandHandler, false);
+    function roattaGlobalCommandHandler(msgEvent)
+	{
+	    try
+		{
+	        if (msgEvent.command === "menuCommandPlayRoattaBoard_mini18")
+		    {
+		        safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("messagePlayRoattaBoard", "mini18");
+		    }
+		    else  if (msgEvent.command === "menuCommandPlayRoattaBoard_medium35")
+            {
+		        safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("messagePlayRoattaBoard", "medium35");
+		    }
+		}
+		catch(err)
+		{
+		    alert("error handling command with roattaGlobalCommandHandler ()\n" + msgEvent.command + ";\nprobable page is local or you have no access to page" + err);
+		}
+        
+    }
+    //safari.application.addEventListener("validate", myValidateHandler, false);
+	//function myValidateHandler(vldEvent)
+	//{
+    //   alert('script command handler");
+	//}
+   </script>
+</head>
+<body>
+</body>
+</html>

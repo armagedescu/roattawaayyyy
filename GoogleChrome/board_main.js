@@ -31,8 +31,8 @@ function drop(ev, chessGame)
    {
       ev.preventDefault(); //TODO: check if need to prevent default
       var data = ev.dataTransfer.getData("Text");  //let's keep in source/target communication style
-      chessGame.BoardClick (data,         true); //move from.id, d&d source
-      chessGame.BoardClick (ev.target.id, true); //move to.id, d&d target
+      chessGame.BoardClick.call (chessGame, data,         true); //move from.id, d&d source
+      chessGame.BoardClick.call (chessGame, ev.target.id, true); //move to.id, d&d target
    }
    catch (err)
    {
@@ -113,7 +113,9 @@ function board_doc_main (chessObject)
    var chessGame = null;
    try
    {
-      chessGame = new IVFChessGame (chessObject.imgPath + "/", chessObject.content, updateListeners);
+      var errDiv = document.getElementById("error_div");  
+      var chessBoard = document.getElementById('chess_board');
+      chessGame = new IVFChessGame (chessObject.imgPath + "/", chessObject.content, updateListeners, errDiv, chessBoard);
 	  chessGame.variable_reset.call(chessGame);  //TODO: try less ctoring
    }
    catch (err)

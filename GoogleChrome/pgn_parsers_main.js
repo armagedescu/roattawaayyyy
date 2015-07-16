@@ -45,11 +45,11 @@ function xdocument_gen()
    
 }
 
-function IVFChessGame(imgPath, chessContent, listenerUpdater)
+function IVFChessGame(imgPath, chessContent, listenerUpdater, errDiv, chessBoard)
 {
 //{events
-this.btnFlipBoardListener   = function () {try { this.flipBoard();              } catch (err)  { alert(err); }    } //TODO: move Move* functions to class member
-this.btnInitListener        = function () {try { this.Init('');                 } catch (err)  { alert(err); }    } 
+this.btnFlipBoardListener   = function () {try { flipBoard.call(this);          } catch (err)  { alert(err); }    } //TODO: move Move* functions to class member
+this.btnInitListener        = function () {try { Init.call(this, '');           } catch (err)  { alert(err); }    } 
 this.btnMoveBackListener    = function () {try { this.MoveBack(1);              } catch (err)  { alert(err); }    }
 this.btnMoveForwardListener = function () {try { this.MoveForward(1);           } catch (err)  { alert(err); }    }
 this.btnMoveLastListener    = function () {try { this.MoveForward(1000);        } catch (err)  { alert(err); }    }
@@ -57,26 +57,26 @@ this.btnGetFENListener      = function () {try { this.GetFEN();                 
 this.btnShowFENListListener = function () {try { this.ShowFENList();            } catch (err)  { alert(err); }    }
 this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         } catch (err)  { alert(err); }    }
 //}end events
-    var errordiv = null;
-    var xdocument = null;  //document stub/simulator TODO: to remove
+    var errordiv = errDiv;
+    var xdocument = new xdocument_gen();  //document stub/simulator TODO: to remove
 
     //public:
-    this.inverse = 0; //public
-    this.board = //public
+    var inverse = 0;
+    var board =
 	   {
-              gameTBodyElement:null,
-              IMGNumersElement:null,
-              IMGLettersElement:null,
-              IMGFlipElement:null
+              gameTBodyElement:  null,
+              IMGNumersElement:  null,
+              IMGLettersElement: null,
+              IMGFlipElement:    null
 	   };
-    this.PGNViewImagePath = imgPath;
-    this.chess_board = null; //TODO: not used
+    var ImgResourcePath = imgPath;
+    var chess_board = chessBoard; //TODO: not used
 
     //private:
 	var contentSelectedText = chessContent; //readonly
     var ScriptPath       = "http://www.lutanho.net/pgn/";
     var MaxMove          = 500;
-    var isInit           = false;
+    //var isInit           = false;
     var isCalculating    = false;
     var StartMove        = null;
     var MoveCount        = null;
@@ -95,8 +95,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     var dragObj          = null;
     var dragBorder       = null;
     var dragImgBorder    = null;
-    var dragImg   = null;
-    var dragPiece = null;
+    var dragImg   = new Array(2); //TODO: to json
+    var dragPiece = new Array(8); //TODO: to json
     var isDragDrop       = false;
     var isAnimating      = false;
     var isExecCommand    = true;
@@ -111,64 +111,59 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     var ScoreSheet       = 0;
     var BGColor          = "";
     //var isRotated        = false;
-    this.isRecording      = false;
-    this.isNullMove       = true;
-    this.RecordCount      = 0;
-    this.RecordedMoves    = "";
-    this.SkipRefresh      = 0;
-    this.AutoPlayInterval = null; //TODO: to remove this
-    this.isAutoPlay       = false;
-    this.Delay            = 1000;
+    var isRecording      = false;
+    var isNullMove       = true;
+    var RecordCount      = 0;
+    var RecordedMoves    = "";
+    var SkipRefresh      = 0;
+    var AutoPlayInterval = null; //TODO: to remove this
+    var isAutoPlay       = false;
+    var Delay            = 1000;
     var BoardClicked     = -1;
-    this.isCapturedPieces = false;
-    this.CandidateStyle   = "";
+    var isCapturedPieces = false;
+    var CandidateStyle   = "";
 
     var PieceName        = "KQRBNP";
     var ShowPieceName    = "KQRBNP";
     var StandardFen      = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     var FenString        = StandardFen;
 ///////////////////////////////////////////////
-    var OldCommands = null;
-    var NewCommands = null;
+    var OldCommands = new Array();
+    var NewCommands = new Array();
 
-    var ShortPgnMoveText = null;
+    var ShortPgnMoveText = [new Array(), new Array(), new Array()]; //TODO: to json
 
-    var Piece = null;
-    var PieceCode  = null;
-    var PiecePic   = null;
+    var Piece = [new Array(16), new Array(16)];
+    var PieceCode  = [PieceName.charCodeAt(0), PieceName.charCodeAt(1), PieceName.charCodeAt(2),
+                          PieceName.charCodeAt(3), PieceName.charCodeAt(4), PieceName.charCodeAt(5)];
+    var PiecePic   = [new Array(6), new Array(6)];
 
-    var ColorName = null;
-    var Castling  = null;
-    this.Board     = null;
+    var ColorName = ["w", "b", "t"];
+    var Castling  = [new Array(2), new Array(2)];
+    this.Board     = [new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8)];
 
-    var HalfMove = null;
+    var HalfMove = new Array(MaxMove + 1);
 
-    var HistMove = null;
-    var HistCommand = null;
-    var HistPiece = null;
-    var HistType  = null;
-    var HistPosX  = null;
-    var HistPosY  = null;
+    var HistMove = new Array(MaxMove);
+    var HistCommand = new Array(MaxMove+1);
+    var HistPiece = [new Array(MaxMove), new Array(MaxMove)];
+    var HistType  = [new Array(MaxMove), new Array(MaxMove)];
+    var HistPosX  = [new Array(MaxMove), new Array(MaxMove)];
+    var HistPosY  = [new Array(MaxMove), new Array(MaxMove)];
 
-    var MoveArray = null;
+    var MoveArray = new Array();
 
-    var LabelPic   = null;
-    var Annotation = null;
-    var DocImg     = null;
+    var LabelPic   = new Array(5);
+    var Annotation = new Array();
+    var DocImg     = new Array();
 
 
     IVFChessGame.ChessPiece = //static
        {
           Pos:
           {
-             X:
-             {
-                _A:0, _B:1, _C:2, _D:3, _E:4, _F:5, _G:6, _H:7
-             },
-             Y:
-             {
-                _1:0, _2:1, _3:2, _4:3, _5:4, _6:5, _7:6, _8:7
-             }
+             X: { _A:0, _B:1, _C:2, _D:3, _E:4, _F:5, _G:6, _H:7 },
+             Y: { _1:0, _2:1, _3:2, _4:3, _5:4, _6:5, _7:6, _8:7 }
           },
           Type:
           {
@@ -180,10 +175,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              Knight   :  4,
              Pawn     :  5
           },
-          Color:
-          {
-             White : 0, Black : 1
-          }
+          Color: { White : 0, Black : 1 }
        };
 ///////////////////////////////////////////////
     this.timeProcessor = new timerWrapper(this);
@@ -192,69 +184,17 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     this.variable_reset = function()
     {
        var chessGame = this;
-       errordiv    = document.getElementById("error_div");           //from static HTML content
-       this.chess_board = document.getElementById('chess_board');    //from static HTML content
-       ScriptPath = "http://www.lutanho.net/pgn/";
-       xdocument = new xdocument_gen();
+       //errordiv    = document.getElementById("error_div");      //from static HTML content
+       //chess_board = document.getElementById('chess_board');    //from static HTML content
 
-
-       this.isRecording=false;
-
-
-       //chessdiv    = document.getElementById("chess_div");           //from static HTML content
-       MaxMove = 500;      isInit = false;        isCalculating = false;
-       CurVar = 0;         activeAnchor = -1;     startAnchor = -1;     activeAnchorBG = "#CCCCCC"; isSetupBoard = false; BoardSetupMode = 'copy';
-       isDragDrop = false; isAnimating = false;   isExecCommand = true; ParseType = 1; AnnotationFile = ""; BoardClicked = -1;
-       ImagePathOld = "-"; mageOffset = 0; IsLabelVisible = true; Border = 1; BorderColor = "#404040"; ScoreSheet = 0; BGColor = "";
-       //isRotated = false;
-       //this.PGNViewImagePath = "";
-	   this.isNullMove=true; this.RecordCount=0; this.RecordedMoves=""; this.SkipRefresh=0;
-       this.isAutoPlay = false; this.Delay = 1000; this.isCapturedPieces=false; this.CandidateStyle = "";
-       PieceName = "KQRBNP"; ShowPieceName = "KQRBNP";  //TODO: to remove
-       //StandardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-       FenString = StandardFen;
-
-       ////////////////////////////////////
-       OldCommands = new Array();
-       NewCommands = new Array();
-       dragImg   = new Array(2); //TODO: to json
-       dragPiece = new Array(8); //TODO: to json
        dragPiece[0] = -1;
        dragPiece[4] = -1;
 
-       ShortPgnMoveText = [new Array(), new Array(), new Array()]; //TODO: to json
-       var i = 0;
-       var j = 0;
-
        ShortPgnMoveText[0][CurVar] = "";
 
-       Piece   = [new Array(16), new Array(16)];
-       for ( i = 0; i < 2; i++)
-          for ( j = 0; j < 16; j++)
+       for (var i = 0; i < 2; i++)
+          for (var j = 0; j < 16; j++)
              Piece[i][j] = {Type:null,Pos:{X:null,Y:null},Moves:null};
-
-       ColorName   = ["w", "b", "t"];
-       Castling    = [new Array(2), new Array(2)];
-
-       this.Board       = [new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8)];
-
-       HalfMove    = new Array(MaxMove + 1);
-       HistMove    = new Array(MaxMove);
-       HistCommand = new Array(MaxMove+1);
-
-       HistPiece = [new Array(MaxMove), new Array(MaxMove)];
-       HistType  = [new Array(MaxMove), new Array(MaxMove)];
-       HistPosX  = [new Array(MaxMove), new Array(MaxMove)];
-       HistPosY  = [new Array(MaxMove), new Array(MaxMove)];
-
-       MoveArray = new Array();
-
-       PieceCode  = [PieceName.charCodeAt(0), PieceName.charCodeAt(1), PieceName.charCodeAt(2),
-                          PieceName.charCodeAt(3), PieceName.charCodeAt(4), PieceName.charCodeAt(5)];
-       PiecePic   = [new Array(6), new Array(6)];
-       LabelPic   = new Array(5);
-       Annotation = new Array();
-       DocImg     = new Array();
 
 	    chessGame.boardWriter.call (chessGame, function (){listenerUpdater(chessGame);});
         chessGame.startParsingDetect_FEN_PGN.call (chessGame); //TODO: too many initialization functions
@@ -309,8 +249,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     {
        try
        {
-          this.PGNViewImagePath = imgPath;
-          this.insertLog("SetImagePath(imgPath = " + imgPath + ")() this.PGNViewImagePath{" + this.PGNViewImagePath + "}*****************");
+          ImgResourcePath = imgPath;
+          this.insertLog("SetImagePath(imgPath = " + imgPath + ")() ImgResourcePath{" + ImgResourcePath + "}*****************");
        }catch(err)
        {}
     }
@@ -319,28 +259,28 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     {
        try
        {
-          if (ImagePathOld == this.PGNViewImagePath) return;
+          if (ImagePathOld == ImgResourcePath) return;
           var ii, jj;
 
-          BoardPic = {src : this.PGNViewImagePath + "t.gif"};
+          BoardPic = {src : ImgResourcePath + "t.gif"};
           for (ii = 0; ii < 2; ii++)
           {
-             PiecePic[ii]  =  [{ src : this.PGNViewImagePath + ColorName[ii] + "k.gif"},
-                                    { src : this.PGNViewImagePath + ColorName[ii] + "q.gif"},
-                                    { src : this.PGNViewImagePath + ColorName[ii] + "r.gif"},
-                                    { src : this.PGNViewImagePath + ColorName[ii] + "b.gif"},
-                                    { src : this.PGNViewImagePath + ColorName[ii] + "n.gif"},
-                                    { src : this.PGNViewImagePath + ColorName[ii] + "p.gif"}];
+             PiecePic[ii]  =  [{ src : ImgResourcePath + ColorName[ii] + "k.gif"},
+                               { src : ImgResourcePath + ColorName[ii] + "q.gif"},
+                               { src : ImgResourcePath + ColorName[ii] + "r.gif"},
+                               { src : ImgResourcePath + ColorName[ii] + "b.gif"},
+                               { src : ImgResourcePath + ColorName[ii] + "n.gif"},
+                               { src : ImgResourcePath + ColorName[ii] + "p.gif"}];
           }                                                                                      
 
           //TODO: is this used?
-          LabelPic = [{src : this.PGNViewImagePath + "8_1.gif"},
-                           {src : this.PGNViewImagePath + "a_h.gif"},
-                           {src : this.PGNViewImagePath + "1_8.gif"},
-                           {src : this.PGNViewImagePath + "h_a.gif"},
-                           {src : this.PGNViewImagePath + "1x1.gif"}];
+          LabelPic = [{src : ImgResourcePath + "8_1.gif"},
+                      {src : ImgResourcePath + "a_h.gif"},
+                      {src : ImgResourcePath + "1_8.gif"},
+                      {src : ImgResourcePath + "h_a.gif"},
+                      {src : ImgResourcePath + "1x1.gif"}];
 
-          ImagePathOld = this.PGNViewImagePath;                                 
+          ImagePathOld = ImgResourcePath;                                 
     
           for (ii = 0; ii < xdocument.images.length; ii++)
           {
@@ -357,7 +297,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     }
 
     //TODO: this function is never used in current version
-    //this.SkipRefreshBoard = function (skipRefresh){ this.SkipRefresh = skipRefresh; }
+    //this.SkipRefreshBoard = function (skipRefresh){ SkipRefresh = skipRefresh; }
 
     this.ApplyFEN = function (ss)
     {
@@ -394,13 +334,13 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     
     //Pieces, positions and moves
     
-    this.Init = function (rr)
+    function Init (rr) //this.Init = function (rr)
     {
        try
        {
           var cc, ii, jj, kk, ll, nn, mm, pieceColor;
-          isInit = true;
-          if (this.isAutoPlay) this.SetAutoPlay(false);
+          //isInit = true;
+          if (isAutoPlay) this.SetAutoPlay(false);
           if (rr != '')
           {
              FenString = rr;
@@ -642,7 +582,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              MoveCount = StartMove;
              MoveType  = StartMove % 2;
              this.SetBoardClicked(-1);
-             this.RecordCount = 0;
+             RecordCount = 0;
              CurVar = 0;
              MoveArray.length = 0;
              if (TargetDocument) HighlightMove("m" + MoveCount + "v" + CurVar);
@@ -708,7 +648,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           appendLog.call (this, "ParseAllPgn: before Init");
           try
           {
-             this.Init('');
+             Init.call (this, '');
           }catch(err)
           {
              //appendLog.call (this, "err: ParseAllPgn() on Init(''):" + err);
@@ -792,11 +732,12 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        return;
     }
 
+	//TODO: this function allow drag&drop. Consider investigating
     this.AllowRecording = function(bb)
     {
        if ((document.BoardForm) && (document.BoardForm.Recording))
           document.BoardForm.Recording.checked = bb;
-       this.isRecording = bb;
+       isRecording = bb;
        this.SetBoardClicked (-1);
     }
 
@@ -808,7 +749,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
         {
            this.AllowRecording(true);
            this.ApplyFEN(contentSelectedText);
-           this.Init('');
+           Init.call (this, '');
            isFen = true;
         }
         catch (err)
@@ -827,7 +768,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
               this.insertLog("startParsingDetect_FEN_PGN() start ParseAllPgn('" + contentSelectedText + "')");
               ParseAllPgn.call(this, contentSelectedText); //TODO: check passing a copy of contentSelectedText
            }
-           this.insertLog("after init image path{" + this.PGNViewImagePath + "}");
+           this.insertLog("after init image path{" + ImgResourcePath + "}");
         }
         catch (err)
         {
@@ -852,20 +793,20 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           }
           document.getElementById("Position").value = xdocument.BoardForm.Position.value;//TODO: by ID?
 		  
-          var numbers_image = this.PGNViewImagePath + "8_1.gif";
-          var letters_image = this.PGNViewImagePath + "a_h.gif";
-          var flip_image    = this.PGNViewImagePath + "flw.gif"; //TODO: to make black/white side flip image
+          var numbers_image = ImgResourcePath + "8_1.gif";
+          var letters_image = ImgResourcePath + "a_h.gif";
+          var flip_image    = ImgResourcePath + "flw.gif"; //TODO: to make black/white side flip image
           
-          if ( this.inverse )
+          if ( inverse )
           {
-             numbers_image = this.PGNViewImagePath   + "1_8.gif";
-             letters_image = this.PGNViewImagePath   + "h_a.gif";
-             flip_image    = this.PGNViewImagePath   + "flb.gif"; //TODO: to make black/white side flip image
+             numbers_image = ImgResourcePath   + "1_8.gif";
+             letters_image = ImgResourcePath   + "h_a.gif";
+             flip_image    = ImgResourcePath   + "flb.gif"; //TODO: to make black/white side flip image
           }
           
-          this.board.IMGLettersElement.src = letters_image;
-          this.board.IMGNumersElement.src  = numbers_image;
-          this.board.IMGFlipElement.src    =    flip_image;
+          board.IMGLettersElement.src = letters_image;
+          board.IMGNumersElement.src  = numbers_image;
+          board.IMGFlipElement.src    =    flip_image;
        }catch(e)
        {
            //this.insertLog("catch: UpdateBoardAndPieceImages()\n" + e);
@@ -874,16 +815,16 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     }
     
     //member
-    this.SetDelay      = function(vv)  { this.Delay      = vv; }	//TODO: change play speed. What is it from?
-    this.AllowNullMove = function(bb)  { this.isNullMove = bb; }
+    this.SetDelay      = function(vv)  { Delay      = vv; }	//TODO: change play speed. What is it from?
+    this.AllowNullMove = function(bb)  { isNullMove = bb; }
 
-    this.SwitchAutoPlay = function() { if (this.isAutoPlay) this.SetAutoPlay(false); else this.SetAutoPlay(true); }
+    this.SwitchAutoPlay = function() { if (isAutoPlay) this.SetAutoPlay(false); else this.SetAutoPlay(true); }
 
     this.SetAutoPlay = function(bb) //try private
     {
-       this.isAutoPlay = bb;
-       if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
-       if (this.isAutoPlay)
+       isAutoPlay = bb;
+       if (AutoPlayInterval) clearTimeoutStub(AutoPlayInterval, this);
+       if (isAutoPlay)
        {
           if ((document.BoardForm)&&(document.BoardForm.AutoPlay))
              document.BoardForm.AutoPlay.value="stop";
@@ -920,8 +861,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     
           if (isSetupBoard) { this.SetupBoardClick(nn); return; }
     
-          if (! this.isRecording) return;
-          //if (this.isAutoPlay)
+          if (!isRecording) return;
+          //if (isAutoPlay)
     	  this.SetAutoPlay(false);//TODO: to remove if, let just SetAutoPlay
           if (MoveCount == MaxMove) return;
           if (BoardClickMove.call (this, nn)) return;
@@ -950,7 +891,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 else
                    ssub=ShortPgnMoveText[0][CurVar]; 
                 if (this.ParseMove(mm, false)==0) { this.SetBoardClicked(-1); return; } //TODO: throws error
-                if (!this.isNullMove) return;
+                if (!isNullMove) return;
                 if (MoveCount%2==0) { if (!confirm("White nullmove?")) return; }
                 else { if (!confirm("Black nullmove?")) return; }
                 for (vv=CurVar; vv<ShortPgnMoveText[0].length; vv++)
@@ -990,14 +931,14 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                          {
                             this.SetMove(MoveCount+1, vv);
                             vv=ShortPgnMoveText[0].length+1;
-                            if (window.UserMove) setTimeoutStub("UserMove(1,'"+mmove0+"')",this.Delay/2, this);
+                            if (window.UserMove) setTimeoutStub("UserMove(1,'"+mmove0+"')",Delay/2, this);
                          }  
                       }  
                    }  
                 }
                 if (vv<ShortPgnMoveText[0].length+1)
                 {
-                   if ((this.RecordCount==0)&&(!((xdocument.BoardForm)&&(xdocument.BoardForm.PgnMoveText))))
+                   if ((RecordCount==0)&&(!((xdocument.BoardForm)&&(xdocument.BoardForm.PgnMoveText))))
                    {
                       vv=ShortPgnMoveText[0].length;
                       ShortPgnMoveText[0][vv]="";
@@ -1006,7 +947,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                       CurVar=vv;
                    }  
                    this.ParseMove(mm,true);
-                   if (window.UserMove) setTimeoutStub("UserMove(0,'"+mm+"')",this.Delay/2, this);
+                   if (window.UserMove) setTimeoutStub("UserMove(0,'"+mm+"')",Delay/2, this);
                    if (MoveType==0)
                    {
                       HistMove[MoveCount-StartMove]=Math.floor((MoveCount+2)/2)+"."+mm;
@@ -1018,16 +959,16 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                       if (MoveCount==StartMove) ssub+=Math.floor((MoveCount+2)/2)+". ... ";
                       else ssub+=HistMove[MoveCount-StartMove-1]+" ";
                    }
-                   if (this.RecordCount==0) this.RecordedMoves=HistMove[MoveCount-StartMove];
+                   if (RecordCount==0) RecordedMoves=HistMove[MoveCount-StartMove];
                    else
                    {
-                      ttmp=this.RecordedMoves.split(" ");
-                      ttmp.length=this.RecordCount+((MoveCount-this.RecordCount)%2)*2;
-                      this.RecordedMoves=ttmp.join(" ");
-                      if (MoveType==0) this.RecordedMoves+=" "+HistMove[MoveCount-StartMove];
-                      else this.RecordedMoves+=" "+mm;
+                      ttmp=RecordedMoves.split(" ");
+                      ttmp.length=RecordCount+((MoveCount-RecordCount)%2)*2;
+                      RecordedMoves=ttmp.join(" ");
+                      if (MoveType==0) RecordedMoves+=" "+HistMove[MoveCount-StartMove];
+                      else RecordedMoves+=" "+mm;
                    }
-                   this.RecordCount++;
+                   RecordCount++;
                    MoveCount++;
                    MoveType=1-MoveType;
                    if (xdocument.BoardForm)
@@ -1154,13 +1095,13 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                    if ((mmove0.indexOf(mm)==0)&&(mmove0.indexOf(mm+mm.substr(1))!=0))
                    {
                       this.SetMove(MoveCount+1, vv);
-                      if (window.UserMove) setTimeoutStub("UserMove(1,'"+mmove0+"')",this.Delay/2, this);
+                      if (window.UserMove) setTimeoutStub("UserMove(1,'"+mmove0+"')",Delay/2, this);
                       return;
                    }  
                 }  
              }  
           }
-          if ((this.RecordCount==0)&&(!((xdocument.BoardForm)&&(xdocument.BoardForm.PgnMoveText))))
+          if ((RecordCount==0)&&(!((xdocument.BoardForm)&&(xdocument.BoardForm.PgnMoveText))))
           {
              vv=ShortPgnMoveText[0].length;
              ShortPgnMoveText[0][vv] = "";
@@ -1170,7 +1111,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           }   
           this.ParseMove(mm, true);
           if (this.IsCheck(Piece[1-MoveType][0].Pos.X, Piece[1-MoveType][0].Pos.Y, 1-MoveType)) mm+="+";
-          if (window.UserMove) setTimeoutStub("UserMove(0,'"+mm+"')",this.Delay/2, this);
+          if (window.UserMove) setTimeoutStub("UserMove(0,'"+mm+"')",Delay/2, this);
           if (MoveType==0)
           {
              HistMove[MoveCount-StartMove]=Math.floor((MoveCount+2)/2)+"."+mm;
@@ -1182,16 +1123,16 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              if (MoveCount==StartMove) ssub+=Math.floor((MoveCount+2)/2)+". ... ";
              else ssub+=HistMove[MoveCount-StartMove-1]+" ";
           }
-          if (this.RecordCount==0) this.RecordedMoves=HistMove[MoveCount-StartMove];
+          if (RecordCount==0) RecordedMoves=HistMove[MoveCount-StartMove];
           else
           {
-             ttmp=this.RecordedMoves.split(" ");
-             ttmp.length=this.RecordCount+((MoveCount-this.RecordCount)%2)*2;
-             this.RecordedMoves=ttmp.join(" ");
-             if (MoveType==0) this.RecordedMoves+=" "+HistMove[MoveCount-StartMove];
-             else this.RecordedMoves+=" "+mm;
+             ttmp=RecordedMoves.split(" ");
+             ttmp.length=RecordCount+((MoveCount-RecordCount)%2)*2;
+             RecordedMoves=ttmp.join(" ");
+             if (MoveType==0) RecordedMoves+=" "+HistMove[MoveCount-StartMove];
+             else RecordedMoves+=" "+mm;
           }
-          this.RecordCount++;
+          RecordCount++;
           MoveCount++;
           MoveType=1-MoveType;
           if (xdocument.BoardForm)
@@ -1214,7 +1155,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     this.RefreshBoard = function (rr)
     {
        //alert("try to refresh board");
-       if (this.SkipRefresh>0) return;
+       if (SkipRefresh > 0) return;
        InitImages.call (this);
        if (rr) DocImg.length = 0;
        var ii, jj, kk, kk0, ll, mm = 1;
@@ -1300,7 +1241,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 }
              }
           }
-          if (this.isCapturedPieces)
+          if (isCapturedPieces)
           {
              var pp0=new Array(0,1,1,2,2,2,8);
              kk0=0;
@@ -1482,337 +1423,337 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
       ww.document.close();
     }
 
-    //TODO: this function is not actually being used
-    this.ParsePgn = function (nn,gg,ffile)
-    {
-      appendLog.call (this, "ParsePgn()");
-      if ((nn>0)&&(nn<5)) ParseType = parseInt(nn);
-      var ii, jj, ll=0, ss, tt, uu=""; 
-      if (ffile) ss=" "+ffile;
-      else
-      { if (! parent.frames[1].document.documentElement) 
-        { if (nn>-50) setTimeoutStub("ParsePgn("+(nn-5)+",'"+gg+"')",400, this); 
-          return; 
-        }
-        ss=parent.frames[1].document.documentElement.innerHTML;
-        if (ss!="") ll=ss.length;
-        if (ll!=nn)
-        { setTimeoutStub("ParsePgn("+ll+",'"+gg+"')",400, this);
-          return;
-        }
-        if (ll==0) return;
-        ss=ss.replace(/\<html\>/i,'');  
-        ss=ss.replace(/\<\/html\>/i,'');
-        ss=ss.replace(/\<head\>/i,'');  
-        ss=ss.replace(/\<\/head\>/i,'');  
-        ss=ss.replace(/\<body\>/i,'');  
-        ss=ss.replace(/\<\/body\>/i,'');
-        ss=ss.replace(/\<pre\>/i,'');  
-        ss=ss.replace(/\<\/pre\>/i,'');  
-        ss=ss.replace(/\<xmp\>/i,'');  
-        ss=ss.replace(/\<\/xmp\>/i,'');    
-        ss=ss.replace(/&quot;/g,'"');
-    //  while (ss.indexOf('&quot;')>0) ss=ss.replace('&quot;','"');
-        ss=ss.replace(/&lt;/g,'<');
-        ss=ss.replace(/&gt;/g,'>');
-        ss=" "+ss;
-      }
-      ss = ss.split("[");
-      if (ss.length<2) return;
-      tt=new Array(ss.length-1);
-      for (ii=1; ii<ss.length; ii++)
-        tt[ii-1]=ss[ii].split("]");
-      var bblack=new Array();
-      var wwhite=new Array();
-      var rresult=new Array();
-      var ppgnText=new Array();
-      var ggameText=new Array();
-      var ffenText=new Array();
-      var ssanText=new Array();
-      var kk, ff, sstype=new Array();
-      jj=0;
-      ffenText[jj]="";
-      ssanText[jj]="";
-      ggameText[jj]="";
-      for (ii=0; ii<tt.length; ii++)
-      { kk=tt[ii][0].split(" ")[0];
-        sstype[kk]=kk;
-        if (tt[ii][0].substr(0,6)=="Black ")
-          bblack[jj]=tt[ii][0].substr(6,tt[ii][0].length);      
-        if (tt[ii][0].substr(0,6)=="White ")
-          wwhite[jj]=tt[ii][0].substr(6,tt[ii][0].length);
-        if (tt[ii][0].substr(0,7)=="Result ")
-          rresult[jj]=tt[ii][0].substr(7,tt[ii][0].length);
-        if (tt[ii][0].substr(0,4)=="FEN ")
-          ffenText[jj]=tt[ii][0].substr(4,tt[ii][0].length);
-        if (tt[ii][0].substr(0,4)=="SAN ")
-          ssanText[jj]=tt[ii][0].substr(4,tt[ii][0].length);      
-        ggameText[jj]+="["+tt[ii][0]+"]<br />";
-        kk=0;    
-        while ((kk<tt[ii][1].length)&&(tt[ii][1].charCodeAt(kk)<49)) kk++; 
-        if (kk<tt[ii][1].length)
-        { ppgnText[jj]=tt[ii][1].substr(kk,tt[ii][1].length);
-          kk=0; ff=String.fromCharCode(13);
-          while ((kk=ppgnText[jj].indexOf(ff, kk))>0) ppgnText[jj]=ppgnText[jj].substr(0,kk)+""+ppgnText[jj].substr(kk+1);
-          kk=0; ff=String.fromCharCode(10)+String.fromCharCode(10);
-          while ((kk=ppgnText[jj].indexOf(ff, kk))>0) ppgnText[jj]=ppgnText[jj].substr(0,kk)+" <br /><br /> "+ppgnText[jj].substr(kk+2);    
-          kk=0; ff=String.fromCharCode(10);
-          while ((kk=ppgnText[jj].indexOf(ff, kk))>0) ppgnText[jj]=ppgnText[jj].substr(0,kk)+" "+ppgnText[jj].substr(kk+1);    
-          while (ffenText[jj].indexOf('"')>=0) ffenText[jj]=ffenText[jj].replace('"','');
-          while (ssanText[jj].indexOf('"')>=0) ssanText[jj]=ssanText[jj].replace('"','');
-          if (ParseType%2==1)
-          { ppgnText[jj]=escape(ppgnText[jj]);
-            ffenText[jj]=escape(ffenText[jj]);
-            ssanText[jj]=escape(ssanText[jj]);        
-            ggameText[jj]=escape(ggameText[jj]);
-          }
-          else
-          { ppgnText[jj]=ppgnText[jj].replace(/\'/g,"\\'");
-            ggameText[jj]=ggameText[jj].replace(/\'/g,"\\'");
-          }  
-          jj++;
-          ffenText[jj]="";
-          ssanText[jj]="";
-          ggameText[jj]="";
-        }
-      }
-      if (ParseType%2==1) uu="unescape";
-      var ssh=ScoreSheet;
-      if ((document.BoardForm)&&(document.BoardForm.ScoreSheet))
-        ssh=parseInt(document.BoardForm.ScoreSheet.options[document.BoardForm.ScoreSheet.options.selectedIndex].value);
-      if ((parent.frames["annotation"])&&(ssh==0)) ssh=1;
-      var bb=BGColor;
-      if (bb=="") bb="#E0C8A0";
-      var dd=parent.frames[1].document;
-      dd.open();
-      dd.writeln("<html><head>");
-      dd.writeln("<style type='text/css'>");
-      dd.writeln("body { background-color:"+bb+";color:#000000;font-size:10pt;line-height:12pt;font-family:Verdana; }");
-      if ((ssh)||(ParseType>2))
-      { dd.writeln("table { border-left:1px solid #808080; border-top:1px solid #808080; }");
-        dd.writeln("td, th { border-right:1px solid #808080; border-bottom:1px solid #808080; font-size:10pt;line-height:12pt;font-family:Verdana; vertical-align:top}");
-      }
-      dd.writeln("a {color:#000000; text-decoration: none}");
-      dd.writeln("a:hover {color:#FFFFFF; background-color:#808080}");
-      dd.writeln("</style>");
-      dd.writeln("<"+"script language='JavaScript'>");
-      ii=this.PGNViewImagePath.replace("/","|");
-      if ((document.BoardForm)&&(document.BoardForm.ImagePath))
-        ii=document.BoardForm.ImagePath.options[document.BoardForm.ImagePath.options.selectedIndex].value;
-      if (ii!="") ii="&SetImagePath="+ii;
-      if (BGColor!="") ii=ii+"&SetBGColor="+BGColor.substr(1,6);
-      if ((document.BoardForm)&&(document.BoardForm.Border)&&(document.BoardForm.Border.options.selectedIndex>0))
-        ii=ii+"&SetBorder=1";
-      if (parent.frames["annotation"])
-        dd.writeln("if (! parent.frames[0]) location.href='pgnannotator.html?'+location.href+'&SetAnnotation="+AnnotationFile+ii+"';");
-      else
-        dd.writeln("if (! parent.frames[0]) location.href='ltpgnviewer.html?'+location.href+'"+ii+"';");
-      dd.writeln("var PgnMoveText=new Array();");
-      dd.writeln("var GameText=new Array();");    
-      dd.writeln("var FenText=new Array();");
-      dd.writeln("var SanText=new Array();");  
-      for (ii=0; ii<jj; ii++)
-      { dd.writeln("PgnMoveText["+ii+"]='"+ppgnText[ii]+"';");
-        dd.writeln("GameText["+ii+"]='"+ggameText[ii]+"';");
-        if (ffenText[ii]!="") dd.writeln("FenText["+ii+"]='"+ffenText[ii]+"';");
-        if (ssanText[ii]!="") dd.writeln("SanText["+ii+"]='"+ssanText[ii]+"';");
-      }
-      dd.writeln("function OpenGame(nn)");
-      dd.writeln("{ if (parent.frames[0].IsComplete)");
-      dd.writeln("  { if (parent.frames[0].IsComplete())");
-      dd.writeln("    { if (nn>=0)");
-      dd.writeln("      { if (FenText[nn]) parent.frames[0].Init("+uu+"(FenText[nn]));");
-      dd.writeln("        else parent.frames[0].Init('standard');");
-      dd.writeln("        if (SanText[nn]) parent.frames[0].ApplySAN("+uu+"(SanText[nn]));");  
-      dd.writeln("        //parent.frames[0].SetPgnMoveText("+uu+"(PgnMoveText[nn])); //variants not possible");
-      dd.writeln("        parent.frames[0].ApplyPgnMoveText("+uu+"(PgnMoveText[nn]),'#CCCCCC',window.document); //variants possible");
-      dd.writeln("        //document.getElementById('GameText').innerHTML="+uu+"(GameText[nn])+'<br />'+PgnMoveText[nn]; //pgn without html links");
-      if (ssh)
-      { dd.writeln("        if (document.getElementById) document.getElementById('GameText').innerHTML=parent.frames[0].ScoreSheetHeader("+uu+"(GameText[nn]))+parent.frames[0].GetHTMLMoveText(0,false,true,"+ssh+")+parent.frames[0].ScoreSheetFooter(); //pgn with html links");
-        dd.writeln("        else if (document.GameTextLayer) { with(document.GameTextLayer) { document.open(); document.write(parent.frames[0].ScoreSheetHeader("+uu+"(GameText[nn]))+parent.frames[0].GetHTMLMoveText(0,false,true,"+ssh+")+parent.frames[0].ScoreSheetFooter()); document.close(); }}//pgn with html links");
-        if (parent.frames["annotation"])
-          dd.writeln("        parent.frames[0].UpdateAnnotation(true);");  
-      }
-      else
-      { dd.writeln("        if (document.getElementById) document.getElementById('GameText').innerHTML="+uu+"(GameText[nn])+'<br />'+parent.frames[0].GetHTMLMoveText(0,false,true); //pgn with html links");  
-        dd.writeln("        else if (document.GameTextLayer) { with(document.GameTextLayer) { document.open(); document.write("+uu+"(GameText[nn])+'<br />'+parent.frames[0].GetHTMLMoveText(0,false,true)); document.close(); }}//pgn with html links");  
-        dd.writeln("        if ((document.forms[0])&&(document.forms[0].GameList)) document.forms[0].GameList.options.selectedIndex=parseInt(nn)+1;");
-      }
-      dd.writeln("      }");
-      if (isDragDrop) dd.writeln("      if (parent.frames[0].SetDragDrop) parent.frames[0].SetDragDrop(1);");    
-      dd.writeln("      return;");
-      dd.writeln("    }");
-      dd.writeln("  }");
-      dd.writeln("  setTimeoutStub('OpenGame('+nn+')',400);", this);
-      dd.writeln("}");
-      dd.writeln("function SetMove(mm,vv){ if (parent.frames[0].SetMove) parent.frames[0].SetMove(mm,vv); }");   
-      if (jj>1)
-      { dd.writeln("function SearchGame()");
-        dd.writeln("{ var tt=document.forms[0].SearchText.value;");
-        dd.writeln("  var oo=document.forms[0].SearchType;");
-        dd.writeln("  oo=oo.options[oo.options.selectedIndex].text;");
-        dd.writeln("  if (tt=='') return(false);");
-        dd.writeln("  var ll=document.forms[0].GameList;");
-        dd.writeln("  var ii, jj=ll.selectedIndex-1, kk=ll.options.length-1;");
-        dd.writeln("  if (oo=='Moves')");
-        dd.writeln("  { for (ii=1; ii<kk; ii++)");
-        dd.writeln("    { if (PgnMoveText[(ii+jj)%kk].indexOf(tt)>=0)");
-        dd.writeln("      { ll.selectedIndex=(ii+jj)%kk+1;");
-        dd.writeln("        OpenGame(ll.options[(ii+jj)%kk+1].value);");
-        dd.writeln("        return(false);");
-        dd.writeln("      }");
-        dd.writeln("    }");
-        dd.writeln("    return(false);");
-        dd.writeln("  }");
-        dd.writeln("  tt=tt.toLowerCase();");
-        dd.writeln("  if (oo=='Player')");
-        dd.writeln("  { for (ii=1; ii<kk; ii++)");
-        dd.writeln("    { if (ll.options[(ii+jj)%kk+1].text.toLowerCase().indexOf(tt)>=0)");
-        dd.writeln("      { ll.selectedIndex=(ii+jj)%kk+1;");
-        dd.writeln("        OpenGame(ll.options[(ii+jj)%kk+1].value);");
-        dd.writeln("        return(false);");
-        dd.writeln("      }");
-        dd.writeln("    }");
-        dd.writeln("    return(false);");
-        dd.writeln("  }");
-        dd.writeln("  for (ii=1; ii<kk; ii++)");
-        dd.writeln("  { var nn, mm=oo.length+3, ss=GameText[(ii+jj)%kk].split('<br />');");
-        dd.writeln("    for (nn=0; nn<ss.length; nn++)");
-        dd.writeln("    { if ((ss[nn].indexOf(oo)>0)&&(ss[nn].toLowerCase().indexOf(tt)>=mm))");
-        dd.writeln("      { ll.selectedIndex=(ii+jj)%kk+1;");
-        dd.writeln("        OpenGame(ll.options[(ii+jj)%kk+1].value);");
-        dd.writeln("        return(false);");
-        dd.writeln("      }");
-        dd.writeln("    }");
-        dd.writeln("  }");
-        dd.writeln("  return(false);");
-        dd.writeln("}");
-        dd.writeln("if (window.event) document.captureEvents(Event.KEYDOWN);");
-        dd.writeln("document.onkeydown = KeyDown;");
-        dd.writeln("function KeyDown(e)");
-        dd.writeln("{ var kk=0;");
-        dd.writeln("  if (e) kk=e.which;");
-        dd.writeln("  else if (window.event) kk=event.keyCode;");
-        dd.writeln("  if ((kk==37)||(kk==52)||(kk==65460)) { if (parent.frames[0].MoveBack) parent.frames[0].MoveBack(1); }");
-        dd.writeln("  if ((kk==39)||(kk==54)||(kk==65462)) { if (parent.frames[0].MoveForward) parent.frames[0].MoveForward(1); }");
-        dd.writeln("}");
-      }
-      dd.writeln("</"+"script>");
-      if (jj==1) dd.writeln("</head><body onLoad=\"setTimeoutStub('OpenGame(0)',400)\">");
-      else 
-      { if (ParseType<3)
-        { if (parseInt(gg)<jj) dd.writeln("</head><body onLoad=\"setTimeoutStub('OpenGame("+gg+")',400)\">");
-          else dd.writeln("</head><body>");
-          dd.writeln("<FORM onSubmit='return SearchGame()'><NOBR><SELECT name='GameList' onChange='OpenGame(this.options[selectedIndex].value)' SIZE=1>");
-          dd.writeln("<OPTION VALUE=-1>Select a game !");
-          for (ii=0; ii<jj; ii++)
-          { if (ii==gg) dd.writeln("<OPTION VALUE="+ii+" selected>"+wwhite[ii].replace(/"/g,'')+" - "+bblack[ii].replace(/"/g,'')+" "+rresult[ii].replace(/"/g,''));
-            else dd.writeln("<OPTION VALUE="+ii+">"+wwhite[ii].replace(/"/g,'')+" - "+bblack[ii].replace(/"/g,'')+" "+rresult[ii].replace(/"/g,''));
-          }
-          dd.writeln("</SELECT>");
-          if (jj<24) dd.writeln("<!--");
-          dd.writeln("<INPUT name='SearchText' size=12><select name='SearchType'><option>Player</option>");
-          for (kk in sstype) dd.writeln("<option>"+kk+"</option>");
-          dd.writeln("<option>Moves</option></select><INPUT type='submit' value='search'>");
-          if (jj<24) dd.writeln("//-->");  
-          dd.writeln("</NOBR></FORM>");
-        }
-        else
-        { dd.writeln("</head><body>");
-          for (ii=0; ii<jj; ii++)
-          { wwhite[ii]=wwhite[ii].replace(/"/g,'').replace('.','').replace(',',' ').replace(/  /g,' ');
-            bblack[ii]=bblack[ii].replace(/"/g,'').replace('.','').replace(',',' ').replace(/  /g,' ');
-          }
-          var ccT, ccL=1, ccN=new Array(), ccI=new Array(), ccC=new Array(), ccS=new Array(), ccO=new Array();
-          ccI[wwhite[0]]=0;
-          ccN[0]=wwhite[0];
-          for (ii=1; ii<jj; ii++)
-          { for (kk=0; kk<ccL; kk++)
-            { if (wwhite[ii]==ccN[kk]) kk=ccL+1;
-            }
-            if (kk==ccL)
-            { ccI[wwhite[ii]]=ccL;
-              ccN[ccL++]=wwhite[ii];
-            }
-          }
-          for (ii=0; ii<jj; ii++)
-          { for (kk=0; kk<ccL; kk++)
-            { if (bblack[ii]==ccN[kk]) kk=ccL+1;
-            }
-            if (kk==ccL)
-            { ccI[bblack[ii]]=ccL;
-              ccN[ccL++]=bblack[ii];
-            }
-          }
-          var ccCT=new Array(ccL); 
-          for (kk=0; kk<ccL; kk++) 
-          { ccC[kk]=0; ccS[kk]=0; ccO[kk]=kk;
-            ccCT[kk]=new Array(ccL);
-            for (ii=0; ii<ccL; ii++) ccCT[kk][ii]="&nbsp;";
-            ccCT[kk][kk]="&nbsp;*";
-          }
-          for (ii=0; ii<jj; ii++)
-          { ccT=rresult[ii].replace(/"/g,'');
-            if ((ccT.length==3)&&(ccT.indexOf("-")==1))
-            { ccS[ccI[wwhite[ii]]]+=1.00001*parseInt(ccT.substr(0,1));
-              ccS[ccI[bblack[ii]]]+=1.00001*parseInt(ccT.substr(2,1));
-              ccCT[ccI[wwhite[ii]]][ccI[bblack[ii]]]+="&nbsp;<a href='javascript:OpenGame("+ii+")'>"+ccT.substr(0,1)+"</a>&nbsp;";
-              ccCT[ccI[bblack[ii]]][ccI[wwhite[ii]]]+="&nbsp;<a href='javascript:OpenGame("+ii+")'>"+ccT.substr(2,1)+"</a>&nbsp;";
-            }
-            else
-            { ccS[ccI[wwhite[ii]]]+=0.5;
-              ccS[ccI[bblack[ii]]]+=0.5;
-              ccCT[ccI[wwhite[ii]]][ccI[bblack[ii]]]+="<a href='javascript:OpenGame("+ii+")'>&#189;</a>";
-              ccCT[ccI[bblack[ii]]][ccI[wwhite[ii]]]+="<a href='javascript:OpenGame("+ii+")'>&#189;</a>";
-            }
-            ccC[ccI[wwhite[ii]]]+=1;
-            ccC[ccI[bblack[ii]]]+=1;
-          }
-          for (ii=0; ii<ccL-1; ii++)
-          { for (kk=ii; kk<ccL; kk++)
-            { if (ccS[ccO[ii]]<ccS[ccO[kk]])
-              { ccT=ccO[ii];
-                ccO[ii]=ccO[kk];
-                ccO[kk]=ccT;
-              }
-            }
-          }
-          dd.writeln("<table border=1 celpadding=0 cellspacing=0 width='100%'><tr><th>Rank</th><th>Name</th>");
-          for (kk=0; kk<ccL; kk++) dd.writeln("<th>"+(kk+1)+"</th>");
-          dd.writeln("<th>Score</th></tr>");
-          for (kk=0; kk<ccL; kk++)
-          { dd.writeln("<tr><th nowrap>"+(kk+1)+"</th><th nowrap>"+ccN[ccO[kk]]+"</th>");
-            for (ii=0; ii<ccL; ii++) dd.writeln("<th nowrap>"+ccCT[ccO[kk]][ccO[ii]]+"&nbsp;</th>"); 
-            dd.writeln("<th nowrap>"+Math.round(10*ccS[ccO[kk]])/10+"/"+ccC[ccO[kk]]+"</th></tr>");
-          }
-          dd.writeln("</table><br>");  
-        }
-      }
-      dd.writeln("<div id='GameText'> </div>");
-      dd.writeln("<layer id='GameTextLayer'> </layer>");  
-      dd.writeln("<!--generated with LT-PGN-VIEWER 3.4--></body></html>");
-      dd.close();
-    }
-
-    this.OpenUrl = function (ss) //TODO: unused
-    {
-       if (ss != "")
-          parent.frames[1].location.href = ss;
-       else
-       {
-          if (document.BoardForm.Url.value != "")  
-          {
-             var nn = document.BoardForm.OpenParsePgn.selectedIndex;
-             if (      (   (nn) || (document.BoardForm.Url.value.indexOf(".htm") > 0)   ) && (!document.layers)       )
-             {
-                parent.frames[1].location.href = document.BoardForm.Url.value;
-                if (nn) setTimeoutStub("ParsePgn(" + nn + ")", 400, this);
-             }
-             else parent.frames[1].location.href = "pgnframe.html?" + document.BoardForm.Url.value;
-          }
-          else parent.frames[1].location.href = "pgnframe.html";
-       }
-    }
+    ////TODO: this function is not actually being used
+    //this.ParsePgn = function (nn,gg,ffile)
+    //{
+    //  appendLog.call (this, "ParsePgn()");
+    //  if ((nn>0)&&(nn<5)) ParseType = parseInt(nn);
+    //  var ii, jj, ll=0, ss, tt, uu=""; 
+    //  if (ffile) ss=" "+ffile;
+    //  else
+    //  { if (! parent.frames[1].document.documentElement) 
+    //    { if (nn>-50) setTimeoutStub("ParsePgn("+(nn-5)+",'"+gg+"')",400, this); 
+    //      return; 
+    //    }
+    //    ss=parent.frames[1].document.documentElement.innerHTML;
+    //    if (ss!="") ll=ss.length;
+    //    if (ll!=nn)
+    //    { setTimeoutStub("ParsePgn("+ll+",'"+gg+"')",400, this);
+    //      return;
+    //    }
+    //    if (ll==0) return;
+    //    ss=ss.replace(/\<html\>/i,'');  
+    //    ss=ss.replace(/\<\/html\>/i,'');
+    //    ss=ss.replace(/\<head\>/i,'');  
+    //    ss=ss.replace(/\<\/head\>/i,'');  
+    //    ss=ss.replace(/\<body\>/i,'');  
+    //    ss=ss.replace(/\<\/body\>/i,'');
+    //    ss=ss.replace(/\<pre\>/i,'');  
+    //    ss=ss.replace(/\<\/pre\>/i,'');  
+    //    ss=ss.replace(/\<xmp\>/i,'');  
+    //    ss=ss.replace(/\<\/xmp\>/i,'');    
+    //    ss=ss.replace(/&quot;/g,'"');
+    ////  while (ss.indexOf('&quot;')>0) ss=ss.replace('&quot;','"');
+    //    ss=ss.replace(/&lt;/g,'<');
+    //    ss=ss.replace(/&gt;/g,'>');
+    //    ss=" "+ss;
+    //  }
+    //  ss = ss.split("[");
+    //  if (ss.length<2) return;
+    //  tt=new Array(ss.length-1);
+    //  for (ii=1; ii<ss.length; ii++)
+    //    tt[ii-1]=ss[ii].split("]");
+    //  var bblack=new Array();
+    //  var wwhite=new Array();
+    //  var rresult=new Array();
+    //  var ppgnText=new Array();
+    //  var ggameText=new Array();
+    //  var ffenText=new Array();
+    //  var ssanText=new Array();
+    //  var kk, ff, sstype=new Array();
+    //  jj=0;
+    //  ffenText[jj]="";
+    //  ssanText[jj]="";
+    //  ggameText[jj]="";
+    //  for (ii=0; ii<tt.length; ii++)
+    //  { kk=tt[ii][0].split(" ")[0];
+    //    sstype[kk]=kk;
+    //    if (tt[ii][0].substr(0,6)=="Black ")
+    //      bblack[jj]=tt[ii][0].substr(6,tt[ii][0].length);      
+    //    if (tt[ii][0].substr(0,6)=="White ")
+    //      wwhite[jj]=tt[ii][0].substr(6,tt[ii][0].length);
+    //    if (tt[ii][0].substr(0,7)=="Result ")
+    //      rresult[jj]=tt[ii][0].substr(7,tt[ii][0].length);
+    //    if (tt[ii][0].substr(0,4)=="FEN ")
+    //      ffenText[jj]=tt[ii][0].substr(4,tt[ii][0].length);
+    //    if (tt[ii][0].substr(0,4)=="SAN ")
+    //      ssanText[jj]=tt[ii][0].substr(4,tt[ii][0].length);      
+    //    ggameText[jj]+="["+tt[ii][0]+"]<br />";
+    //    kk=0;    
+    //    while ((kk<tt[ii][1].length)&&(tt[ii][1].charCodeAt(kk)<49)) kk++; 
+    //    if (kk<tt[ii][1].length)
+    //    { ppgnText[jj]=tt[ii][1].substr(kk,tt[ii][1].length);
+    //      kk=0; ff=String.fromCharCode(13);
+    //      while ((kk=ppgnText[jj].indexOf(ff, kk))>0) ppgnText[jj]=ppgnText[jj].substr(0,kk)+""+ppgnText[jj].substr(kk+1);
+    //      kk=0; ff=String.fromCharCode(10)+String.fromCharCode(10);
+    //      while ((kk=ppgnText[jj].indexOf(ff, kk))>0) ppgnText[jj]=ppgnText[jj].substr(0,kk)+" <br /><br /> "+ppgnText[jj].substr(kk+2);    
+    //      kk=0; ff=String.fromCharCode(10);
+    //      while ((kk=ppgnText[jj].indexOf(ff, kk))>0) ppgnText[jj]=ppgnText[jj].substr(0,kk)+" "+ppgnText[jj].substr(kk+1);    
+    //      while (ffenText[jj].indexOf('"')>=0) ffenText[jj]=ffenText[jj].replace('"','');
+    //      while (ssanText[jj].indexOf('"')>=0) ssanText[jj]=ssanText[jj].replace('"','');
+    //      if (ParseType%2==1)
+    //      { ppgnText[jj]=escape(ppgnText[jj]);
+    //        ffenText[jj]=escape(ffenText[jj]);
+    //        ssanText[jj]=escape(ssanText[jj]);        
+    //        ggameText[jj]=escape(ggameText[jj]);
+    //      }
+    //      else
+    //      { ppgnText[jj]=ppgnText[jj].replace(/\'/g,"\\'");
+    //        ggameText[jj]=ggameText[jj].replace(/\'/g,"\\'");
+    //      }  
+    //      jj++;
+    //      ffenText[jj]="";
+    //      ssanText[jj]="";
+    //      ggameText[jj]="";
+    //    }
+    //  }
+    //  if (ParseType%2==1) uu="unescape";
+    //  var ssh=ScoreSheet;
+    //  if ((document.BoardForm)&&(document.BoardForm.ScoreSheet))
+    //    ssh=parseInt(document.BoardForm.ScoreSheet.options[document.BoardForm.ScoreSheet.options.selectedIndex].value);
+    //  if ((parent.frames["annotation"])&&(ssh==0)) ssh=1;
+    //  var bb=BGColor;
+    //  if (bb=="") bb="#E0C8A0";
+    //  var dd=parent.frames[1].document;
+    //  dd.open();
+    //  dd.writeln("<html><head>");
+    //  dd.writeln("<style type='text/css'>");
+    //  dd.writeln("body { background-color:"+bb+";color:#000000;font-size:10pt;line-height:12pt;font-family:Verdana; }");
+    //  if ((ssh)||(ParseType>2))
+    //  { dd.writeln("table { border-left:1px solid #808080; border-top:1px solid #808080; }");
+    //    dd.writeln("td, th { border-right:1px solid #808080; border-bottom:1px solid #808080; font-size:10pt;line-height:12pt;font-family:Verdana; vertical-align:top}");
+    //  }
+    //  dd.writeln("a {color:#000000; text-decoration: none}");
+    //  dd.writeln("a:hover {color:#FFFFFF; background-color:#808080}");
+    //  dd.writeln("</style>");
+    //  dd.writeln("<"+"script language='JavaScript'>");
+    //  ii= ImgResourcePath.replace("/","|");
+    //  if ((document.BoardForm)&&(document.BoardForm.ImagePath))
+    //    ii=document.BoardForm.ImagePath.options[document.BoardForm.ImagePath.options.selectedIndex].value;
+    //  if (ii!="") ii="&SetImagePath="+ii;
+    //  if (BGColor!="") ii=ii+"&SetBGColor="+BGColor.substr(1,6);
+    //  if ((document.BoardForm)&&(document.BoardForm.Border)&&(document.BoardForm.Border.options.selectedIndex>0))
+    //    ii=ii+"&SetBorder=1";
+    //  if (parent.frames["annotation"])
+    //    dd.writeln("if (! parent.frames[0]) location.href='pgnannotator.html?'+location.href+'&SetAnnotation="+AnnotationFile+ii+"';");
+    //  else
+    //    dd.writeln("if (! parent.frames[0]) location.href='ltpgnviewer.html?'+location.href+'"+ii+"';");
+    //  dd.writeln("var PgnMoveText=new Array();");
+    //  dd.writeln("var GameText=new Array();");    
+    //  dd.writeln("var FenText=new Array();");
+    //  dd.writeln("var SanText=new Array();");  
+    //  for (ii=0; ii<jj; ii++)
+    //  { dd.writeln("PgnMoveText["+ii+"]='"+ppgnText[ii]+"';");
+    //    dd.writeln("GameText["+ii+"]='"+ggameText[ii]+"';");
+    //    if (ffenText[ii]!="") dd.writeln("FenText["+ii+"]='"+ffenText[ii]+"';");
+    //    if (ssanText[ii]!="") dd.writeln("SanText["+ii+"]='"+ssanText[ii]+"';");
+    //  }
+    //  dd.writeln("function OpenGame(nn)");
+    //  dd.writeln("{ if (parent.frames[0].IsComplete)");
+    //  dd.writeln("  { if (parent.frames[0].IsComplete())");
+    //  dd.writeln("    { if (nn>=0)");
+    //  dd.writeln("      { if (FenText[nn]) parent.frames[0].Init("+uu+"(FenText[nn]));");
+    //  dd.writeln("        else parent.frames[0].Init('standard');");
+    //  dd.writeln("        if (SanText[nn]) parent.frames[0].ApplySAN("+uu+"(SanText[nn]));");  
+    //  dd.writeln("        //parent.frames[0].SetPgnMoveText("+uu+"(PgnMoveText[nn])); //variants not possible");
+    //  dd.writeln("        parent.frames[0].ApplyPgnMoveText("+uu+"(PgnMoveText[nn]),'#CCCCCC',window.document); //variants possible");
+    //  dd.writeln("        //document.getElementById('GameText').innerHTML="+uu+"(GameText[nn])+'<br />'+PgnMoveText[nn]; //pgn without html links");
+    //  if (ssh)
+    //  { dd.writeln("        if (document.getElementById) document.getElementById('GameText').innerHTML=parent.frames[0].ScoreSheetHeader("+uu+"(GameText[nn]))+parent.frames[0].GetHTMLMoveText(0,false,true,"+ssh+")+parent.frames[0].ScoreSheetFooter(); //pgn with html links");
+    //    dd.writeln("        else if (document.GameTextLayer) { with(document.GameTextLayer) { document.open(); document.write(parent.frames[0].ScoreSheetHeader("+uu+"(GameText[nn]))+parent.frames[0].GetHTMLMoveText(0,false,true,"+ssh+")+parent.frames[0].ScoreSheetFooter()); document.close(); }}//pgn with html links");
+    //    if (parent.frames["annotation"])
+    //      dd.writeln("        parent.frames[0].UpdateAnnotation(true);");  
+    //  }
+    //  else
+    //  { dd.writeln("        if (document.getElementById) document.getElementById('GameText').innerHTML="+uu+"(GameText[nn])+'<br />'+parent.frames[0].GetHTMLMoveText(0,false,true); //pgn with html links");  
+    //    dd.writeln("        else if (document.GameTextLayer) { with(document.GameTextLayer) { document.open(); document.write("+uu+"(GameText[nn])+'<br />'+parent.frames[0].GetHTMLMoveText(0,false,true)); document.close(); }}//pgn with html links");  
+    //    dd.writeln("        if ((document.forms[0])&&(document.forms[0].GameList)) document.forms[0].GameList.options.selectedIndex=parseInt(nn)+1;");
+    //  }
+    //  dd.writeln("      }");
+    //  if (isDragDrop) dd.writeln("      if (parent.frames[0].SetDragDrop) parent.frames[0].SetDragDrop(1);");    
+    //  dd.writeln("      return;");
+    //  dd.writeln("    }");
+    //  dd.writeln("  }");
+    //  dd.writeln("  setTimeoutStub('OpenGame('+nn+')',400);", this);
+    //  dd.writeln("}");
+    //  dd.writeln("function SetMove(mm,vv){ if (parent.frames[0].SetMove) parent.frames[0].SetMove(mm,vv); }");   
+    //  if (jj>1)
+    //  { dd.writeln("function SearchGame()");
+    //    dd.writeln("{ var tt=document.forms[0].SearchText.value;");
+    //    dd.writeln("  var oo=document.forms[0].SearchType;");
+    //    dd.writeln("  oo=oo.options[oo.options.selectedIndex].text;");
+    //    dd.writeln("  if (tt=='') return(false);");
+    //    dd.writeln("  var ll=document.forms[0].GameList;");
+    //    dd.writeln("  var ii, jj=ll.selectedIndex-1, kk=ll.options.length-1;");
+    //    dd.writeln("  if (oo=='Moves')");
+    //    dd.writeln("  { for (ii=1; ii<kk; ii++)");
+    //    dd.writeln("    { if (PgnMoveText[(ii+jj)%kk].indexOf(tt)>=0)");
+    //    dd.writeln("      { ll.selectedIndex=(ii+jj)%kk+1;");
+    //    dd.writeln("        OpenGame(ll.options[(ii+jj)%kk+1].value);");
+    //    dd.writeln("        return(false);");
+    //    dd.writeln("      }");
+    //    dd.writeln("    }");
+    //    dd.writeln("    return(false);");
+    //    dd.writeln("  }");
+    //    dd.writeln("  tt=tt.toLowerCase();");
+    //    dd.writeln("  if (oo=='Player')");
+    //    dd.writeln("  { for (ii=1; ii<kk; ii++)");
+    //    dd.writeln("    { if (ll.options[(ii+jj)%kk+1].text.toLowerCase().indexOf(tt)>=0)");
+    //    dd.writeln("      { ll.selectedIndex=(ii+jj)%kk+1;");
+    //    dd.writeln("        OpenGame(ll.options[(ii+jj)%kk+1].value);");
+    //    dd.writeln("        return(false);");
+    //    dd.writeln("      }");
+    //    dd.writeln("    }");
+    //    dd.writeln("    return(false);");
+    //    dd.writeln("  }");
+    //    dd.writeln("  for (ii=1; ii<kk; ii++)");
+    //    dd.writeln("  { var nn, mm=oo.length+3, ss=GameText[(ii+jj)%kk].split('<br />');");
+    //    dd.writeln("    for (nn=0; nn<ss.length; nn++)");
+    //    dd.writeln("    { if ((ss[nn].indexOf(oo)>0)&&(ss[nn].toLowerCase().indexOf(tt)>=mm))");
+    //    dd.writeln("      { ll.selectedIndex=(ii+jj)%kk+1;");
+    //    dd.writeln("        OpenGame(ll.options[(ii+jj)%kk+1].value);");
+    //    dd.writeln("        return(false);");
+    //    dd.writeln("      }");
+    //    dd.writeln("    }");
+    //    dd.writeln("  }");
+    //    dd.writeln("  return(false);");
+    //    dd.writeln("}");
+    //    dd.writeln("if (window.event) document.captureEvents(Event.KEYDOWN);");
+    //    dd.writeln("document.onkeydown = KeyDown;");
+    //    dd.writeln("function KeyDown(e)");
+    //    dd.writeln("{ var kk=0;");
+    //    dd.writeln("  if (e) kk=e.which;");
+    //    dd.writeln("  else if (window.event) kk=event.keyCode;");
+    //    dd.writeln("  if ((kk==37)||(kk==52)||(kk==65460)) { if (parent.frames[0].MoveBack) parent.frames[0].MoveBack(1); }");
+    //    dd.writeln("  if ((kk==39)||(kk==54)||(kk==65462)) { if (parent.frames[0].MoveForward) parent.frames[0].MoveForward(1); }");
+    //    dd.writeln("}");
+    //  }
+    //  dd.writeln("</"+"script>");
+    //  if (jj==1) dd.writeln("</head><body onLoad=\"setTimeoutStub('OpenGame(0)',400)\">");
+    //  else 
+    //  { if (ParseType<3)
+    //    { if (parseInt(gg)<jj) dd.writeln("</head><body onLoad=\"setTimeoutStub('OpenGame("+gg+")',400)\">");
+    //      else dd.writeln("</head><body>");
+    //      dd.writeln("<FORM onSubmit='return SearchGame()'><NOBR><SELECT name='GameList' onChange='OpenGame(this.options[selectedIndex].value)' SIZE=1>");
+    //      dd.writeln("<OPTION VALUE=-1>Select a game !");
+    //      for (ii=0; ii<jj; ii++)
+    //      { if (ii==gg) dd.writeln("<OPTION VALUE="+ii+" selected>"+wwhite[ii].replace(/"/g,'')+" - "+bblack[ii].replace(/"/g,'')+" "+rresult[ii].replace(/"/g,''));
+    //        else dd.writeln("<OPTION VALUE="+ii+">"+wwhite[ii].replace(/"/g,'')+" - "+bblack[ii].replace(/"/g,'')+" "+rresult[ii].replace(/"/g,''));
+    //      }
+    //      dd.writeln("</SELECT>");
+    //      if (jj<24) dd.writeln("<!--");
+    //      dd.writeln("<INPUT name='SearchText' size=12><select name='SearchType'><option>Player</option>");
+    //      for (kk in sstype) dd.writeln("<option>"+kk+"</option>");
+    //      dd.writeln("<option>Moves</option></select><INPUT type='submit' value='search'>");
+    //      if (jj<24) dd.writeln("//-->");  
+    //      dd.writeln("</NOBR></FORM>");
+    //    }
+    //    else
+    //    { dd.writeln("</head><body>");
+    //      for (ii=0; ii<jj; ii++)
+    //      { wwhite[ii]=wwhite[ii].replace(/"/g,'').replace('.','').replace(',',' ').replace(/  /g,' ');
+    //        bblack[ii]=bblack[ii].replace(/"/g,'').replace('.','').replace(',',' ').replace(/  /g,' ');
+    //      }
+    //      var ccT, ccL=1, ccN=new Array(), ccI=new Array(), ccC=new Array(), ccS=new Array(), ccO=new Array();
+    //      ccI[wwhite[0]]=0;
+    //      ccN[0]=wwhite[0];
+    //      for (ii=1; ii<jj; ii++)
+    //      { for (kk=0; kk<ccL; kk++)
+    //        { if (wwhite[ii]==ccN[kk]) kk=ccL+1;
+    //        }
+    //        if (kk==ccL)
+    //        { ccI[wwhite[ii]]=ccL;
+    //          ccN[ccL++]=wwhite[ii];
+    //        }
+    //      }
+    //      for (ii=0; ii<jj; ii++)
+    //      { for (kk=0; kk<ccL; kk++)
+    //        { if (bblack[ii]==ccN[kk]) kk=ccL+1;
+    //        }
+    //        if (kk==ccL)
+    //        { ccI[bblack[ii]]=ccL;
+    //          ccN[ccL++]=bblack[ii];
+    //        }
+    //      }
+    //      var ccCT=new Array(ccL); 
+    //      for (kk=0; kk<ccL; kk++) 
+    //      { ccC[kk]=0; ccS[kk]=0; ccO[kk]=kk;
+    //        ccCT[kk]=new Array(ccL);
+    //        for (ii=0; ii<ccL; ii++) ccCT[kk][ii]="&nbsp;";
+    //        ccCT[kk][kk]="&nbsp;*";
+    //      }
+    //      for (ii=0; ii<jj; ii++)
+    //      { ccT=rresult[ii].replace(/"/g,'');
+    //        if ((ccT.length==3)&&(ccT.indexOf("-")==1))
+    //        { ccS[ccI[wwhite[ii]]]+=1.00001*parseInt(ccT.substr(0,1));
+    //          ccS[ccI[bblack[ii]]]+=1.00001*parseInt(ccT.substr(2,1));
+    //          ccCT[ccI[wwhite[ii]]][ccI[bblack[ii]]]+="&nbsp;<a href='javascript:OpenGame("+ii+")'>"+ccT.substr(0,1)+"</a>&nbsp;";
+    //          ccCT[ccI[bblack[ii]]][ccI[wwhite[ii]]]+="&nbsp;<a href='javascript:OpenGame("+ii+")'>"+ccT.substr(2,1)+"</a>&nbsp;";
+    //        }
+    //        else
+    //        { ccS[ccI[wwhite[ii]]]+=0.5;
+    //          ccS[ccI[bblack[ii]]]+=0.5;
+    //          ccCT[ccI[wwhite[ii]]][ccI[bblack[ii]]]+="<a href='javascript:OpenGame("+ii+")'>&#189;</a>";
+    //          ccCT[ccI[bblack[ii]]][ccI[wwhite[ii]]]+="<a href='javascript:OpenGame("+ii+")'>&#189;</a>";
+    //        }
+    //        ccC[ccI[wwhite[ii]]]+=1;
+    //        ccC[ccI[bblack[ii]]]+=1;
+    //      }
+    //      for (ii=0; ii<ccL-1; ii++)
+    //      { for (kk=ii; kk<ccL; kk++)
+    //        { if (ccS[ccO[ii]]<ccS[ccO[kk]])
+    //          { ccT=ccO[ii];
+    //            ccO[ii]=ccO[kk];
+    //            ccO[kk]=ccT;
+    //          }
+    //        }
+    //      }
+    //      dd.writeln("<table border=1 celpadding=0 cellspacing=0 width='100%'><tr><th>Rank</th><th>Name</th>");
+    //      for (kk=0; kk<ccL; kk++) dd.writeln("<th>"+(kk+1)+"</th>");
+    //      dd.writeln("<th>Score</th></tr>");
+    //      for (kk=0; kk<ccL; kk++)
+    //      { dd.writeln("<tr><th nowrap>"+(kk+1)+"</th><th nowrap>"+ccN[ccO[kk]]+"</th>");
+    //        for (ii=0; ii<ccL; ii++) dd.writeln("<th nowrap>"+ccCT[ccO[kk]][ccO[ii]]+"&nbsp;</th>"); 
+    //        dd.writeln("<th nowrap>"+Math.round(10*ccS[ccO[kk]])/10+"/"+ccC[ccO[kk]]+"</th></tr>");
+    //      }
+    //      dd.writeln("</table><br>");  
+    //    }
+    //  }
+    //  dd.writeln("<div id='GameText'> </div>");
+    //  dd.writeln("<layer id='GameTextLayer'> </layer>");  
+    //  dd.writeln("<!--generated with LT-PGN-VIEWER 3.4--></body></html>");
+    //  dd.close();
+    //}
+    //
+    //this.OpenUrl = function (ss) //TODO: unused
+    //{
+    //   if (ss != "")
+    //      parent.frames[1].location.href = ss;
+    //   else
+    //   {
+    //      if (document.BoardForm.Url.value != "")  
+    //      {
+    //         var nn = document.BoardForm.OpenParsePgn.selectedIndex;
+    //         if (      (   (nn) || (document.BoardForm.Url.value.indexOf(".htm") > 0)   ) && (!document.layers)       )
+    //         {
+    //            parent.frames[1].location.href = document.BoardForm.Url.value;
+    //            if (nn) setTimeoutStub("ParsePgn(" + nn + ")", 400, this);
+    //         }
+    //         else parent.frames[1].location.href = "pgnframe.html?" + document.BoardForm.Url.value;
+    //      }
+    //      else parent.frames[1].location.href = "pgnframe.html";
+    //   }
+    //}
 
     this.GetHTMLMoveText = function (vvariant, nnoscript, ccommenttype, sscoresheet)
     { var vv=0, tt, ii, uu="", uuu="", cc, bb=0, bbb=0;
@@ -2020,7 +1961,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        if (BoardClicked >= 0) this.SetBoardClicked(-1);
        for (jj = 0; (jj < nn) && (MoveCount > StartMove); jj++)
        {
-          if (this.RecordCount > 0) this.RecordCount--;
+          if (RecordCount > 0) RecordCount--;
           MoveCount--;
           MoveType = 1 - MoveType;
           cc = MoveCount - StartMove;
@@ -2080,8 +2021,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        }
        if (TargetDocument) HighlightMove("m" + MoveCount + "v" + CurVar);
        this.UpdateAnnotation(false);
-       if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
-       if (this.isAutoPlay) this.AutoPlayInterval=setTimeoutStub("MoveBack("+nn+")", this.Delay, this);
+       if (AutoPlayInterval) clearTimeoutStub(AutoPlayInterval, this);
+       if (isAutoPlay) AutoPlayInterval=setTimeoutStub("MoveBack("+nn+")", Delay, this);
        this.UpdateBoardAndPieceImages();
     }
 
@@ -2208,9 +2149,9 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           }
           if (TargetDocument) HighlightMove("m" + MoveCount + "v" + CurVar);
           this.UpdateAnnotation(false);
-          if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
+          if (AutoPlayInterval) clearTimeoutStub(AutoPlayInterval, this);
 		  var this_ref = this; //save, because this will change in context of lambda function
-          if (this.isAutoPlay) this.AutoPlayInterval = setTimeoutStub(function(){this_ref.MoveForward(nMoveNumber);}, this.Delay, this);
+          if (isAutoPlay) AutoPlayInterval = setTimeoutStub(function(){this_ref.MoveForward(nMoveNumber);}, Delay, this);
           this.UpdateBoardAndPieceImages();
        }catch(e)
        {
@@ -2291,7 +2232,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           if (pp==1)
           {
              this.SetBoardClicked(iiv+8*(7-jjv));
-             BoardClick(nn);
+             this.BoardClick (nn);
              return(true);
           }
        }
@@ -2616,13 +2557,13 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        {
           if ((mm.indexOf("O") >= 0) || (mm.indexOf("0") >= 0))
           {
-             if ((mm.indexOf("O-O-O") >= 0) || (mm.indexOf("0-0-0") >= 0) || (mm.indexOf("O朞朞") >= 0) || (mm.indexOf("0𢠢") >= 0)) 
+             if ((mm.indexOf("O-O-O") >= 0) || (mm.indexOf("0-0-0") >= 0))// || (mm.indexOf("O朞朞") >= 0) || (mm.indexOf("0??") >= 0)) 
              {
                 if (this.EvalMove(ttype0, 6, xx0, yy0, ttype1, xx1, yy1, ccapt, sstore))
                    return(1);
                 return(0);
              }
-             if ((mm.indexOf("O-O") >= 0) || (mm.indexOf("0-0") >= 0) || (mm.indexOf("O朞") >= 0) || (mm.indexOf("0�0") >= 0))
+             if ((mm.indexOf("O-O") >= 0) || (mm.indexOf("0-0") >= 0))// || (mm.indexOf("O朞") >= 0) || (mm.indexOf("0?") >= 0))
              {
                 if (this.EvalMove(ttype0, 7, xx0, yy0, ttype1, xx1, yy1, ccapt, sstore))
                    return(1);
@@ -2630,7 +2571,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              }
              return(0);
           }
-          if ((mm.indexOf("---") >= 0) || (mm.indexOf("枛�") >= 0))
+          if ((mm.indexOf("---") >= 0))// || (mm.indexOf("枛?) >= 0))
           //if (mm.indexOf("...")>=0) //is buggy
           {
              if (this.EvalMove(ttype0, 8, xx0, yy0, ttype1, xx1, yy1, ccapt, sstore))
@@ -2648,7 +2589,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
         }
         if (ffrom.charAt(ll-1)=="x") ccapt=1;
         else
-        { if ((ffrom.charAt(ll-1)=="-")||(ffrom.charAt(ll-1)=="�")) ll--; //Smith Notation
+        { if ((ffrom.charAt(ll-1)=="-"))ll--;//||(ffrom.charAt(ll-1)=="?)) ll--; //Smith Notation
         }
         if (isNaN(mm.charAt(ll-1-ccapt)))
         { xx0=ffrom.charCodeAt(ll-1-ccapt)-97;
@@ -3018,16 +2959,16 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
 	
 	this.ExecCommand = function (bb) { isExecCommand = bb;}
 
-    this.flipBoard = function() //to move into chessgame
+    function flipBoard () //this.flipBoard = function() //to move into chessgame
     {
       //never anymore write the board from scratch
       //by using board*Writer functions
       //don't generate anymore HTML text
       try
       {
-         this.inverse ^= 1;
+         inverse ^= 1;
       
-         var chessBoard = this.board.gameTBodyElement;
+         var chessBoard = board.gameTBodyElement;
          var firstChild = chessBoard.firstChild;
          for (var i = 0; i < 7; i++)
          {
@@ -3056,7 +2997,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     {
         try
         {
-          var pp = this.PGNViewImagePath;
+          var pp = ImgResourcePath;
         
     	  //standard start game setup
           var ll = [ pp + "br.gif", pp + "bn.gif", pp + "bb.gif", pp + "bq.gif", pp + "bk.gif", pp + "bb.gif", pp + "bn.gif", pp + "br.gif",
@@ -3075,7 +3016,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           tableElement.border      = 0;
           tableElement.cellPadding = 0;
           tableElement.cellSpacing = 0;
-          this.board.gameTBodyElement = document.createElement("tbody");
+          board.gameTBodyElement = document.createElement("tbody");
         
           var tableTBodyTrElement;
           var tableTBodyTrTdElement;
@@ -3101,7 +3042,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 tableTBodyTrElement.appendChild(tableTBodyTrTdElement);
              
                 imgIdx = ii;
-                if(this.inverse) imgIdx = 64 - (ii + 1);
+                if (inverse) imgIdx = 64 - (ii + 1);
                 cellId = "" + imgIdx;
                 
                 // Chess Piece ream images from the game here. First update, setup with no game started
@@ -3111,10 +3052,10 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 tableTBodyTrTdElement.appendChild(tableTBodyTrTdImgElement);
              
              }
-             this.board.gameTBodyElement.appendChild(tableTBodyTrElement);
+             board.gameTBodyElement.appendChild(tableTBodyTrElement);
           }
         
-          tableElement.appendChild(this.board.gameTBodyElement);
+          tableElement.appendChild(board.gameTBodyElement);
         
           tableBoardBorderTd.appendChild(tableElement);//add to the outer board table now
         }catch(err)
@@ -3122,7 +3063,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
            alert('error: boardGameWriter() ' + err);
         }
     }
-	
+
+	//TODO: split boardWriter
     this.boardWriter = function (updateBrowserListeners)
     {
         try
@@ -3137,8 +3079,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
            var tableTBodyTrElement = document.createElement("tr");
            var tableTBodyTrTdElement = document.createElement("td");  //1-8 image here
         
-           this.board.IMGNumersElement = document.createElement("img");
-           tableTBodyTrTdElement.appendChild(this.board.IMGNumersElement);
+           board.IMGNumersElement = document.createElement("img");
+           tableTBodyTrTdElement.appendChild(board.IMGNumersElement);
            tableTBodyTrElement.appendChild(tableTBodyTrTdElement);
            tableTBodyElement.appendChild(tableTBodyTrElement);
         
@@ -3151,20 +3093,19 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
            
            tableTBodyTrTdElement = document.createElement("td"); //flip
            tableTBodyTrTdElement.id = 'btnFlipBoard';
-           this.board.IMGFlipElement = document.createElement("img"); 
+           board.IMGFlipElement = document.createElement("img"); 
         
-           tableTBodyTrTdElement.appendChild(this.board.IMGFlipElement);
+           tableTBodyTrTdElement.appendChild(board.IMGFlipElement);
            tableTBodyTrElement.appendChild(tableTBodyTrTdElement);
            tableTBodyTrTdElement = document.createElement("td");      //A-H image here
-           this.board.IMGLettersElement = document.createElement("img");
-           tableTBodyTrTdElement.appendChild(this.board.IMGLettersElement);
+           board.IMGLettersElement = document.createElement("img");
+           tableTBodyTrTdElement.appendChild(board.IMGLettersElement);
         
            tableTBodyTrElement.appendChild(tableTBodyTrTdElement);
            tableTBodyElement.appendChild(tableTBodyTrElement);
         
            tableElement.appendChild(tableTBodyElement);
-        
-           this.chess_board.appendChild(tableElement);
+           chess_board.appendChild(tableElement);
            
            this.UpdateBoardAndPieceImages();
         
@@ -3174,7 +3115,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
         
         }catch(err)
         {
-           alert('error: boardGameWriter() ' + err);
+           alert('error: boardWriter() ' + err);
         }
     
     }	
@@ -3196,7 +3137,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     var SwitchSetupBoard = function()
     { this.SetBoardClicked(-1);
       if (!isSetupBoard)
-      { Init('standard');
+      { Init.call (this, 'standard');
         isSetupBoard=true;
         if ((document.BoardForm)&&(document.BoardForm.SetupBoard))
           document.BoardForm.SetupBoard.value=" Ready ";
@@ -3241,7 +3182,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
       ss=ss+" "+Math.floor((MoveCount+2)/2);
       if ((document.BoardForm)&&(document.BoardForm.FEN))
         document.BoardForm.FEN.value=ss;    
-      Init(ss);
+      Init.call (this, ss);
     }
 
     var ApplyPgnMoveText = function (ss, rroot, ddocument, ggame)
@@ -3673,7 +3614,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        {
           if (! xdocument.BoardForm) return;
           if (! xdocument.images[ImageOffset].style) { BoardClicked = nn; return; }
-          if (this.CandidateStyle != "") this.HighlightCandidates(nn, this.CandidateStyle);
+          if (CandidateStyle != "") this.HighlightCandidates(nn, CandidateStyle);
           if (isDragDrop) { BoardClicked = nn; return; }
           //if (BoardClicked >= 0) //really needed styles processing?
           //{
@@ -3708,8 +3649,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     //TODO: enable this function
     this.ShowCapturedPieces = function (bb)
     {
-      this.isCapturedPieces = bb;
-      if (this.isCapturedPieces) this.RefreshBoard();
+      isCapturedPieces = bb;
+      if (isCapturedPieces) this.RefreshBoard();
       else
       {
          var kk, kk0 = 0;
@@ -4003,7 +3944,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     { if (isNaN(mmove)) return;
       var ii=isCalculating;
       isCalculating=true;
-      if (this.RecordCount>0) this.MoveBack(MaxMove);
+      if (RecordCount>0) this.MoveBack(MaxMove);
       if (vvariant)
       { if (vvariant>=ShortPgnMoveText[0].length) { isCalculating=ii; return; }
         if (CurVar!=vvariant) 
@@ -4028,8 +3969,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
       if (isCalculating) return;
       if ((document.BoardForm)&&(document.BoardForm.PgnMoveText))
         document.BoardForm.PgnMoveText.value=ShortPgnMoveText[0][CurVar];
-      if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
-      if (this.isAutoPlay) this.AutoPlayInterval=setTimeoutStub(function(){this.MoveForward(1);}, this.Delay, this);
+      if (AutoPlayInterval) clearTimeoutStub(AutoPlayInterval, this);
+      if (isAutoPlay) AutoPlayInterval=setTimeoutStub(function(){this.MoveForward(1);}, Delay, this);
     }
 
     this.UpdateAnnotation = function(bb)
@@ -4070,7 +4011,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     this.GetDiagram = function(pp, ssp)
     { var ii, jj, cc, tt, nn, mm, ss=String.fromCharCode(13)+"<P align=center>", oo, aa=new Array(64);
       var bb=Border;
-      var iip=this.PGNViewImagePath;
+      var iip= ImgResourcePath;
       if (document.BoardForm)
       { if (oo=document.BoardForm.ImagePath)
         { iip=oo.options[oo.options.selectedIndex].value;
@@ -4195,19 +4136,19 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
       if (IsLabelVisible)
       { //if (isRotated)
         //{ ss+="</th><th><img src='"+iip+"1_8.gif'></th>";
-        //  if (this.isCapturedPieces) ss+="<th>"+this.GetCapturedPieces(iip,bb)+"</th>";
+        //  if (isCapturedPieces) ss+="<th>"+this.GetCapturedPieces(iip,bb)+"</th>";
         //  ss+="</tr><tr><th><img src='"+iip+"h_a.gif'></th><th><img src='"+iip+"1x1.gif'>";
-        //  if (this.isCapturedPieces) ss+="</th><th>";
+        //  if (isCapturedPieces) ss+="</th><th>";
         //}
         //else
         { ss+="</th><th><img src='"+iip+"8_1.gif'></th>";
-          if (this.isCapturedPieces) ss+="<th>"+this.GetCapturedPieces(iip,bb)+"</th>";
+          if (isCapturedPieces) ss+="<th>"+this.GetCapturedPieces(iip,bb)+"</th>";
           ss+="</tr><tr><th><img src='"+iip+"a_h.gif'></th><th><img src='"+iip+"1x1.gif'>";
-          if (this.isCapturedPieces) ss+="</th><th>";
+          if (isCapturedPieces) ss+="</th><th>";
         }  
       }
       else
-      { if (this.isCapturedPieces) ss+="</th><th>"+this.GetCapturedPieces(iip,bb);
+      { if (isCapturedPieces) ss+="</th><th>"+this.GetCapturedPieces(iip,bb);
       }
       ss+="</th></tr></table></P>"+String.fromCharCode(13);
       return (ss);
@@ -4375,14 +4316,14 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              if (nn>=0)
              {
                 this.SetBoardSetupMode('delete');
-                /*if (isRotated) BoardClick(63-nn,true);
-                else*/ BoardClick(nn,true);
+                /*if (isRotated) this.BoardClick(63-nn,true);
+                else*/ this.BoardClick(nn,true);
                 this.SetBoardSetupMode('move');
              }
              return;
           }
           this.SetBoardClicked(-1);
-          BoardClick(ii+64,true);
+          this.BoardClick(ii+64,true);
        }catch(e)
        {
           alert("SetupPieceClick>>error: " + e);
@@ -4490,123 +4431,123 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
       //isDragDrop=bb; //TODO: no impacts anymore
     
     }
-    //TODO: notused; to review and remove completely MouseDown
-    //      drag&drop have better HTML5 implemetations, no need for simulations anymore
-    this.MouseDown = function(e)
-    { var ii="";
-      if (dragObj) this.MouseUp(e);
-      if (e)
-      { dragObj=e.target;
-        ii=dragObj.id;
-        dragX=e.clientX;
-        dragY=e.clientY;
-      }
-      else if (window.event)
-      { dragObj=event.srcElement;
-        ii=dragObj.id;
-        dragX=event.clientX;
-        dragY=event.clientY;
-      }
-      else return;
-      if (isNaN(parseInt(ii))) { dragObj=null; return; }
-      if (ii<64) BoardClick(ii,true);
-      else this.SetupPieceClick(ii-64,true);
-      if (!isDragDrop) return;
-      if ((BoardClicked<0)||(this.isAutoPlay)) dragObj=null;
-      else 
-      { dragObj.style.zIndex=200;
-        dragBorder=dragObj.style.borderWidth;
-        if (dragBorder) dragObj.style.borderWidth="0px";
-      }
-      return false;
-    }
-    //TODO: notused; to review and remove completely MouseMove
-    //      drag&drop have better HTML5 implemetations, no need for simulations anymore
-    this.MouseMove = function(e)
-    {
-       if (!isDragDrop      ) return;
-       if ( BoardClicked < 0) return; //not a drag&drop from board 
-       if ( dragObj) //simulate piece drag
-       {
-          if (e)
-          {
-             dragObj.style.left = (e.clientX-dragX) + "px";
-             dragObj.style.top  = (e.clientY-dragY) + "px";
-          }
-          else if (window.event) //probably IE
-          {
-             dragObj.style.left = (event.clientX-dragX) + "px";
-             dragObj.style.top  = (event.clientY-dragY) + "px";
-          }
-       }
-       return false;
-    }
+    ////TODO: notused; to review and remove completely MouseDown
+    ////      drag&drop have better HTML5 implemetations, no need for simulations anymore
+    //this.MouseDown = function(e)
+    //{ var ii="";
+    //  if (dragObj) this.MouseUp(e);
+    //  if (e)
+    //  { dragObj=e.target;
+    //    ii=dragObj.id;
+    //    dragX=e.clientX;
+    //    dragY=e.clientY;
+    //  }
+    //  else if (window.event)
+    //  { dragObj=event.srcElement;
+    //    ii=dragObj.id;
+    //    dragX=event.clientX;
+    //    dragY=event.clientY;
+    //  }
+    //  else return;
+    //  if (isNaN(parseInt(ii))) { dragObj=null; return; }
+    //  if (ii<64) this.BoardClick(ii,true);
+    //  else this.SetupPieceClick(ii-64,true);
+    //  if (!isDragDrop) return;
+    //  if ((BoardClicked<0)||(isAutoPlay)) dragObj=null;
+    //  else 
+    //  { dragObj.style.zIndex=200;
+    //    dragBorder=dragObj.style.borderWidth;
+    //    if (dragBorder) dragObj.style.borderWidth="0px";
+    //  }
+    //  return false;
+    //}
+    ////TODO: notused; to review and remove completely MouseMove
+    ////      drag&drop have better HTML5 implemetations, no need for simulations anymore
+    //this.MouseMove = function(e)
+    //{
+    //   if (!isDragDrop      ) return;
+    //   if ( BoardClicked < 0) return; //not a drag&drop from board 
+    //   if ( dragObj) //simulate piece drag
+    //   {
+    //      if (e)
+    //      {
+    //         dragObj.style.left = (e.clientX-dragX) + "px";
+    //         dragObj.style.top  = (e.clientY-dragY) + "px";
+    //      }
+    //      else if (window.event) //probably IE
+    //      {
+    //         dragObj.style.left = (event.clientX-dragX) + "px";
+    //         dragObj.style.top  = (event.clientY-dragY) + "px";
+    //      }
+    //   }
+    //   return false;
+    //}
 
-    //TODO: used in notused; to review and remove completely MouseUp(e)
-    //      drag&drop have better HTML5 implemetations, no need for simulations anymore
-    //compute coords and call BoardClick or SetupPieceClick
-    //cell number: BoardClicked is not updated here
-    this.MouseUp = function(e)
-    {
-       var ii, jj, ddx = 0, ddy = 0, ww = 32;
-       if (!isDragDrop)        return;
-       if (BoardClicked < 0)   return;
-       if (dragObj)
-       {
-          ww=dragObj.width;
-          if (dragBorder) ww += 2 * parseInt(dragBorder);
-       }
-       if ((isNaN(ww)) || (ww==0)) ww = 32;
-       if (e)
-       {
-          ddx = e.clientX - dragX;
-          ddy = e.clientY - dragY;
-       }
-       else if (window.event)
-       {
-         ddx = event.clientX - dragX;
-         ddy = event.clientY - dragY;
-       }  
-       else return;
-       if (BoardClicked < 64)
-       {
-          //if (isRotated)
-          //{
-          //   ii =     ( 63 - BoardClicked )      % 8;
-          //   jj = 7 - ( 63 - BoardClicked - ii ) / 8;
-          //}
-          //else
-          {
-             ii =       BoardClicked       % 8;
-             jj = 7 - ( BoardClicked - ii) / 8;
-          }
-       }
-       else 
-       {
-          ii = 9 +             BoardClicked       % 2 ;
-          jj = 7 - Math.floor((BoardClicked - 64) / 2);
-       }
-       //Target i, j squares calculating
-       ii += Math.round (ddx / ww); 
-       jj -= Math.round (ddy / ww);
-       if       ( ( ii >= 0) && (ii < 8) && (jj >= 0) && (jj  < 8) )     BoardClick ( 8 * ( 7 - jj ) + ii, true);
-       else if  ( (isSetupBoard) && (ii == 9) && (jj == 0)    )     this.SetupPieceClick(12, true);
-       else                                                              BoardClick(BoardClicked, true);
-    
-       // drag icon simulator
-       if (dragObj)
-       {
-          dragObj.style.left = "0px";
-          dragObj.style.top  = "0px";
-          dragObj.style.zIndex = 1;
-          if (dragBorder) dragObj.style.borderWidth = dragBorder;
-          dragObj = null;
-       } 
-    }
+    ////TODO: used in notused; to review and remove completely MouseUp(e)
+    ////      drag&drop have better HTML5 implemetations, no need for simulations anymore
+    ////compute coords and call BoardClick or SetupPieceClick
+    ////cell number: BoardClicked is not updated here
+    //this.MouseUp = function(e)
+    //{
+    //   var ii, jj, ddx = 0, ddy = 0, ww = 32;
+    //   if (!isDragDrop)        return;
+    //   if (BoardClicked < 0)   return;
+    //   if (dragObj)
+    //   {
+    //      ww=dragObj.width;
+    //      if (dragBorder) ww += 2 * parseInt(dragBorder);
+    //   }
+    //   if ((isNaN(ww)) || (ww==0)) ww = 32;
+    //   if (e)
+    //   {
+    //      ddx = e.clientX - dragX;
+    //      ddy = e.clientY - dragY;
+    //   }
+    //   else if (window.event)
+    //   {
+    //     ddx = event.clientX - dragX;
+    //     ddy = event.clientY - dragY;
+    //   }  
+    //   else return;
+    //   if (BoardClicked < 64)
+    //   {
+    //      //if (isRotated)
+    //      //{
+    //      //   ii =     ( 63 - BoardClicked )      % 8;
+    //      //   jj = 7 - ( 63 - BoardClicked - ii ) / 8;
+    //      //}
+    //      //else
+    //      {
+    //         ii =       BoardClicked       % 8;
+    //         jj = 7 - ( BoardClicked - ii) / 8;
+    //      }
+    //   }
+    //   else
+    //   {
+    //      ii = 9 +             BoardClicked       % 2 ;
+    //      jj = 7 - Math.floor((BoardClicked - 64) / 2);
+    //   }
+    //   //Target i, j squares calculating
+    //   ii += Math.round (ddx / ww); 
+    //   jj -= Math.round (ddy / ww);
+    //   if       ( ( ii >= 0) && (ii < 8) && (jj >= 0) && (jj  < 8) )     this.BoardClick ( 8 * ( 7 - jj ) + ii, true);
+    //   else if  ( (isSetupBoard) && (ii == 9) && (jj == 0)    )     this.SetupPieceClick(12, true);
+    //   else                                                              this.BoardClick(BoardClicked, true);
+    //
+    //   // drag icon simulator
+    //   if (dragObj)
+    //   {
+    //      dragObj.style.left = "0px";
+    //      dragObj.style.top  = "0px";
+    //      dragObj.style.zIndex = 1;
+    //      if (dragBorder) dragObj.style.borderWidth = dragBorder;
+    //      dragObj = null;
+    //   } 
+    //}
 
     //TODO: what is this for?
     this.AnimateBoard = function (nn)
-    { var pp=0, mm=parseInt(this.Delay)/100;
+    { var pp=0, mm=parseInt(Delay)/100;
       isAnimating=true;
       if (dragPiece[4]>=0) mm*=0.75;
       mm=Math.floor(mm);
@@ -4681,10 +4622,10 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     }
 
 
-    //TODO: what is this for?
-    var IsComplete = function(){return(isInit);}
+    ////TODO: what is this for?
+    //var IsComplete = function(){return(isInit);}
     //TODO: unused
-    //var SetCandidateStyle = function (ss){this.CandidateStyle=ss;}
+    //var SetCandidateStyle = function (ss){CandidateStyle=ss;}
 	//TODO: what is it for?
 	this.SetAnnotation = function(ff) { AnnotationFile=ff;}
 

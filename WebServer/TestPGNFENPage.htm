@@ -1,0 +1,232 @@
+<!-- saved from url=(0025)http://localhost/pgn.html -->
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+   <title>PGN</title>
+   <script language="JavaScript">
+   function doXmlHtml()
+   {
+      try
+      {
+         //alert("do XML HTML");
+         //alert(document.documentElement.nodeName);
+         //alert(document.getElementById("xml_html").nodeName);//.nodeName);
+         var table              = document.createElement('table');
+         var chess_board_tbody  = document.createElement('tbody');
+         var tr                 = document.createElement('tr');
+         var td                 = document.createElement('td');
+         var textNode           = document.createTextNode('salut');
+         td.appendChild(textNode);
+         tr.appendChild(td);
+         chess_board_tbody.appendChild(tr);
+         table.appendChild(chess_board_tbody);
+         table.border = "1";
+         table.id = 'chess_board';
+         //.style = "visibility:visible";
+         //document.cerateElement();
+         var xml_html = document.getElementById('xml_html');
+         xml_html.appendChild(table);
+         //alert(document.documentElement.innerHTML);
+         //alert("did XML HTML");
+         textNode.data = "norok";
+         
+      }catch(err)
+      {
+         alert(err + ": " + err.description);
+      }
+   }
+   function doCheckBrowser()
+   {
+      alert("browser: " + navigator.appName + "\nversion: " + navigator.appVersion);
+   }
+   function doTestPopup()
+   {
+      //open("board.html", "myWindow", "status = 1, height = 350, width = 350, resizable = 0, scrollbars=0");
+	  open("about:blank", "_blank", "status = 1, height = 350, width = 350, resizable = 0, scrollbars=0");
+   }
+   </script>
+</head>
+<body>
+<button onclick="javascript:doXmlHtml()">XML HTML</button>
+<div id="xml_html"></div><br />
+<button onclick="javascript:doCheckBrowser();">check browser</button><br />
+<button onclick="javascript:doTestPopup();">check window open</button><br />
+
+
+<pre>[FEN "rnbqkb1r/ppp2ppp/3p1n2/4p3/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq e6 0 4 - -"]
+
+4.e3 exd4 5.exd4 Bf5 6.h3 Be7 7.Nf3 O-O 8.Be2 Re8 9.O-O Qd7 10.a3 Bxh3 11.gxh3
+Qxh3 12.Nh2 Nbd7 13.Bf4 c6  {in progress} *
+<br>
+ 1.f4 d5 2.Nf3 g6 3.e3 Bg7 4.Be2 Nf6 5.0-0 0-0 6.d3 c5.
+ <br>
+[White "Yang"]
+[Black "Herry"] 
+1. e4 e5 2. Bf1c4 Bf8c5 3. Qd1h5 Qd8f6 4. Bc4xf7 Ke8d8 5. Bf7xg8 Qf6xf2
+6. Ke1d1 Qf2f1 0-1 
+<br>
+Start from a random position sample:
+[Event "white to move"]
+[FEN "rn2r1k1/ppq2pb1/2pp2pp/8/2PQn1b1/1PN2NP1/PB3PBP/3RR1K1 w - - 0 17"]
+17.Qxg7 Kxg7 18.Nd5 Kf8 19.Nxc7
+<br>
+This is sample of FEN position you can select and preview:
+rn2r1k1/ppq2pQ1/2pp2pp/8/2P1n1b1/1PN2NP1/PB3PBP/3RR1K1 b - - 0 17
+<br>
+
+[Event "COPA DO BRASIL DE XADREX"]
+[Site "http://apps.facebook.com/mychess/"]
+[Date "2013.01.03"]
+[White "Gerhard Braun"]
+[WhiteElo "1072"]
+[Black "Ion Filipski"]
+[BlackElo "1154"]
+[Round "4"]
+[Result "*"]
+[FEN "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1 - -"]
+
+2...d5 2.Nc3 Nf6 3.Nf3 e6 4.Bg5 Be7 5.e3 O-O 6.Bd3 c5  {in curs} *
+<br>
+
+[White "Ion Filipski"]
+[Black "Gennaro Scagliarini"]
+[Result "1-0"]
+
+1.e4 d6 2.Nf3 Bg4 3.Be2 Nf6 4.Nc3 g6 5.O-O Bg7 6.d4 O-O 7.Bg5 Nbd7 8.Qd2 c6
+9.Rae1 e5 10.Nh4 Bxe2 11.Rxe2 Qc7 12.dxe5 dxe5 13.Qd3 Rad8 14.Qg3 Rfe8 15.Bc1 b5
+16.f4 exf4 17.Bxf4 Ne5 18.Qg5 Nh5 19.Bc1 f6 20.Qe3 Ng4 21.Qh3 Qb6+ 22.Be3
+Nxe3 23.Rxe3 Bh6 24.g4 Bxe3+ 25.Kh1 Nf4 26.Qf3 Rd2 27.Nd1 Red8 28.Nxe3
+Rxh2+ 29.Kxh2 Rd2+ 30.Kg3 g5 31.Rf2 Rxf2 32.Kxf2 Qd4 33.Nhf5 Qd2+
+34.Kf1 Qc1+ 35.Qd1 Qxd1+ 36.Nxd1 h5 37.gxh5 Nxh5 38.Kf2 Kf7 39.Nde3 a5
+40.b3 Ke6 41.Kf3 Kf7 42.Nd6+ Ke6 43.Nef5 Nf4 44.Nb7 a4 45.bxa4 Ng6 46.a5
+Ne5+ 47.Ke2 Nc4 48.a6 Ke5 49.Nbd6 Nb6 50.Kf3 b4 51.a7 Na8 52.Ke3 g4
+53.Nc4+ Ke6 54.Nfd6 c5 55.Nc8 f5 56.N8b6 Nc7 57.exf5+ Kxf5 58.a8=Q Nxa8
+59.Nxa8 Kg5 60.Kf2 Kf4 61.Nab6 Ke4 62.Kg3 Kd4 63.Kh4 Kc3 64.Ne3 Kb2 65.Na4+
+Kxa2 66.Nxc5 Kb2 67.Kxg4 Kc3 68.Na4+ Kd4 69.Kf3 Ke5 70.Ke2 Kd4 71.Kd2 Ke4
+72.Nc5+ Kd4 73.Nb3+ Ke4 74.Nc4 Kd5 75.Nca5 Ke4 76.Ke2 Kf4 77.Kd3 
+{cedata} 1-0
+<br>
+</pre>
+
+    <script>
+	   function cout(str){try{document.getElementById("log").innerText += str + "\n";}catch(err){}}
+       function dragOver(ev)
+       {
+          try
+          {
+             event.preventDefault();
+             cout ("dragOver: ev.target.id = " + event.target.id);
+          }catch(err)
+          {
+             cout ("dragOver: err " + err);
+          }
+       }
+       function dragEnter(ev)
+       {
+          try
+          {
+             event.preventDefault();
+             cout ("dragEnter: ev.target.id = " + event.target.id);
+          }catch(err)
+          {
+             cout ("dragEnter: err " + err);
+          }
+       }
+       function dragDrag(ev)
+       {
+          try
+          {
+             //event.preventDefault();
+             cout ("dragDrag: ev.target.id = " + event.target.id);
+          }catch(err)
+          {
+             cout ("dragDrag: err " + err);
+          }
+       }
+       function dragStart(ev)
+       {
+          document.getElementById("log").innerText += "dragStart()\n";
+          try
+          {
+             event.dataTransfer.setData("Text", ev.target.id);
+             cout ("dragStart: ev.target.id = " + event.target.id);
+             cout ("dragStart: by data transfer = " + event.dataTransfer.getData("Text"));
+			 throw "this is expected error";
+          }catch(err)
+          {
+             cout ("dragStart err: " + err);
+          }
+       }
+       
+       function dragDrop(ev)
+       {
+          cout ("dragDrop start");
+          event.preventDefault();
+          var data=event.dataTransfer.getData("Text");
+          event.target.appendChild(document.getElementById(data));
+          cout ("dragDrop");
+       }
+    </script>
+
+    <table border = "1">
+       <tr>
+          <td id="0:0">there is ID 0:0</td>
+          <td id="0:1">there is ID 0:1</td>
+       </tr>
+       <tr>
+          <td id="1:0">there is ID 1:0</td>
+          <td id="1:1">there is ID 1:1</td>
+       </tr>
+       <tr>
+          <td id="2:0"> <img src="medium35/flw.gif" draggable="true" id="drag1" />there is ID 2:0</td>    
+          <td id="2:1">there is ID 2:1</td>
+       </tr>
+    </table>
+    <div id="log">.</div>
+    <script>
+       try
+       {
+          document.getElementById("0:0").addEventListener("drag",     dragDrag, false);
+          document.getElementById("0:1").addEventListener("drag",     dragDrag, false);
+          document.getElementById("1:0").addEventListener("drag",     dragDrag, false);
+          document.getElementById("1:1").addEventListener("drag",     dragDrag, false);
+          document.getElementById("2:0").addEventListener("drag",     dragDrag, false);
+          document.getElementById("2:1").addEventListener("drag",     dragDrag, false);
+
+
+          document.getElementById("0:0").addEventListener("dragover", dragOver, false);
+          document.getElementById("0:1").addEventListener("dragover", dragOver, false);
+          document.getElementById("1:0").addEventListener("dragover", dragOver, false);
+          document.getElementById("1:1").addEventListener("dragover", dragOver, false);
+          document.getElementById("2:0").addEventListener("dragover", dragOver, false);
+          document.getElementById("2:1").addEventListener("dragover", dragOver, false);
+
+          document.getElementById("0:0").addEventListener("dragenter", dragEnter, false);
+          document.getElementById("0:1").addEventListener("dragenter", dragEnter, false);
+          document.getElementById("1:0").addEventListener("dragenter", dragEnter, false);
+          document.getElementById("1:1").addEventListener("dragenter", dragEnter, false);
+          document.getElementById("2:0").addEventListener("dragenter", dragEnter, false);
+          document.getElementById("2:1").addEventListener("dragenter", dragEnter, false);
+
+          
+          document.getElementById("0:0").addEventListener("drop",     dragDrop, false);
+          document.getElementById("0:1").addEventListener("drop",     dragDrop, false);
+          document.getElementById("1:0").addEventListener("drop",     dragDrop, false);
+          document.getElementById("1:1").addEventListener("drop",     dragDrop, false);
+          document.getElementById("2:0").addEventListener("drop",     dragDrop, false);
+          document.getElementById("2:1").addEventListener("drop",     dragDrop, false);
+          
+          document.getElementById("drag1").addEventListener("dragstart", dragStart, false);
+          document.getElementById("log").innerText = document.getElementById("drag1").outerHTML + "\n";
+       }catch(err)
+       {
+          document.getElementById("log").innerText = "startup error: " + err;
+       }
+    </script>       
+    <!-- div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <img src="medium35/wr.gif" draggable="true" ondragstart="drag(event)" id="drag1">aaa</div>
+    
+    <div id="div2" ondrop="drop(event)" ondragover="allowDrop(event)">zzz</div -->
+
+</body>
+</html>

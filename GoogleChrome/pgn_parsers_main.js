@@ -224,8 +224,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           errordiv.innerText += "";
           errordiv.insertBefore(document.createElement("br"),    errordiv.firstChild);
           errordiv.insertBefore(document.createTextNode(logStr), errordiv.firstChild);
-       }
-       catch (err)
+       }catch(err)
        {
           alert("error on this.insertLog(" + logStr + ")" + err); //report but don't rethrow
        }
@@ -235,8 +234,10 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        try
        {
           errordiv.innerHTML = ""; //clear here
-          if (logStr) appendLog.call (this,logStr); //log replacement if any
-
+          if (logStr)
+          {
+             appendLog.call (this,logStr); //log replacement if any
+          }
        }
        catch (err)
        {
@@ -604,235 +605,46 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        }
     }
 
-	var Re =
-        {
-	        FenTag: /^.*?\[\s?FEN\s+["']?\s*([^"']*)\s*[\"']?\s*]\s*/ig,
-	    	TrailingSpaces: /(^\s*|\s*$)/gm
-	    }
-	function ParsePgnProperties (pgnText)
-	{
-	    var reHavePGNProperties = /.*?[[\]].*/gm;
-	    var rePGNProperty = /^.*?\[.*?\]/gm
-        for(var i = 0; i < 2000 && pgnText.match(reHavePGNProperties);  i++)
-        {
-           //appendLog.call (this, "ParseAllPgn: parsing tags");
-           var prop = pgnText.match(rePGNProperty)[0];
-           this.insertLog("prop: " + prop);
-           prop = prop.replace(Re.TrailingSpaces, "");
-           xdocument.game.prop[i] = prop;
-           var arr = Re.FenTag.exec(prop);
-           if(arr != null && arr.length == 2)
-              FenString = arr[1];
- 
-           pgnText = pgnText.replace(rePGNProperty,  "");
-           pgnText = pgnText.replace(Re.TrailingSpaces,  "");
-        }
-		if (FenString) this.insertLog("FenString: " + FenString);
-		return pgnText;
-	}
-
-    function ExtractMove (pgnRawText)
-    {
-	    for (var i = 0; i < 6000; i++)
-        {
-            i += pgnRawText.match(/^\s*/gm)[0].length;
-			if (!isNaN (pgnRawText.charAt(i)) )
-            {
-			}
-        }
-	}
-	
-	function PGNTokenizer (pgn)
-	{
-	    var str = pgn, pos = 0;
-		function extract () {}
-	    function extractInt ()
-        {
-	        if ( !str.charAt(pos).match(/^\d/ ) ) throw "expected number at pos: " + pos + " in str: " + str;
-	        var ret = "";
-            for (var i = pos; i < str.length; i++)
-			{
-                if ( !str.charAt(i).match(/^\d/) )
-                {
-                    pos += ret.length;
-                    return parseInt (ret);
-			    }
-                ret += str.charAt (i);
-            }
-        }
-	    function extractSpaces ()
-        {
-	        var ret = "";
-            for (var i = pos; i < str.length; i++) {
-                if ( !str.charAt (i).match (/^\s/gm) )
-                {
-                    pos += ret.length;
-				    return ret;
-			    }
-				ret += str.charAt (i);
-            }
-        }
-	    function extractComment1 () // start with ";"
-		{
-		    if ( str.charAt(pos) != ";" ) throw "unexpected char: '" + str.charAt(pos) + "' instead of ';' at pos: " + pos + " in str: " + str;
-	        var ret = "";
-            for (var i = pos; i < str.length; i++)
-            {
-                var token = str.charAt (i);
-                if ( token != '\r' && token != '\n') break;
-                ret += token; //don't allow new line
-            }
-            pos += ret.length; //allow end of PGN
-	        return ret;
-		}
-	    function extractComment2 () // start with "{" and ends with "}"
-		{
-		    if ( str.charAt(pos) != "{" ) throw "unexpected char: '" + str.charAt(pos) + "' instead of '{' at pos: " + pos + " in str: " + str;
-	        var ret = "";
-			var token = "";
-            for (var i = pos; i < str.length; i++)
-            {
-			    token = str.charAt (i);
-                ret += token; 
-                if ( str.charAt (i) == '\}') break;
-            }
-            pos += ret.length; //allow end of PGN
-	        return ret;
-		}
-	    function extractVariant (at)
-		{
-		    if ( str.charAt(i) != "(" ) throw "unexpected char: '" + str.charAt(i) + "' instead of '(' at pos: " + pos + " in str: " + str;
-			var ret = str.charAt(i);
-            for (var i = at + 1; i < str.length; i++)
-            {
-			    while (str.charAt(i) == "(") //for consecutive variants
-				{
-				    var subVariant = extractVariant(i); //for nested variants
-					ret += subVariant;
-					i += subVariant.length;
-				}
-				else
-				{
-				    ret += str.charAt (i);
-				}
-				if (str.charAt(i) == ")"){
-				
-				}
-            }
-		}
-	    function extractVariants ()
-        {
-		    if ( str.charAt(i) != "(" ) throw "unexpected char: '" + str.charAt(i) + "' instead of '(' at pos: " + pos + " in str: " + str;
-            for (var i = pos; i < str.length; i++)
-            {
-            }
-        }
-	}
-    function ParsePgnMoves2 (pgnRawText)
-	{
-        //str.charAt(i); //str.charCodeAt (i) //String.fromCharCode (code)
-        //parseInt(nn);
-		var pgnText = pgnRawText;
-	    for (var i = 0; i < 6000; i++)
-        {
-            //i += mov.match(/^\s*/gm)[0].length;
-			//if (!isNaN ()
-        }
-    }
-
-	function ParsePgnMoves (pgnText)
-	{
-        var re = 
-		    {
-                EndNumAndPoint: /\s*\d*\s*\.$/gm
-			}
-        //var reEndNumAndPoint = /\s*\d*\s*\.$/gm;
-	    for (var i = 0; i < 6000 && pgnText.match(/^\d+\s*\./gm);  i++)
-        {
-            //appendLog.call (this, "ParseAllPgn: inside loop");
-            //var movNoCurrent, movNoNext;
-            var mov = pgnText.match(/^\d+\s*\.+[^\.]+\.?/gm)[0];
-            var movNoCurrent = mov.match(/^\d*/gm)[0]; //1
-			mov = mov.replace(re.EndNumAndPoint, "");
-            //if (mov.match(re.EndNumAndPoint)){ mov = mov.replace(re.EndNumAndPoint, ""); }
-            pgnText = pgnText.substr  (mov.length); //2.Nf3 Bg4 3.Be2 Nf6
-            pgnText = pgnText.replace (Re.TrailingSpaces, "");
-            
-            var movNoNext = pgnText.match(/^\d*/gm)[0];
-            
-            
-            mov = mov.replace(/^\s*\d*.*?\.\s*/gm, "");   //remove number and dot
-            
-			//1. zz ... 1.... yy probably contains ... (null moves)
-            if ( movNoCurrent == movNoNext )
-            {
-                //var movTemp = pgnText.match(/^\d*\s*\.[^\.]*\.?/gm)[0];
-                var movTemp = "";
-                var pgnTemp = pgnText;
-                //movTemp += movNoCurrent;
-                if (pgnTemp.match(/^\d+\s*\.\.\.\s*/gm))
-                {
-                    movTemp = pgnTemp.match(/^\d+\s*\.\.\.\s*/gm)[0]; //extract starting digitdots
-                    pgnTemp = pgnTemp.substr(movTemp.length);
-                }
-                movTemp += pgnTemp.match(/^[^\.]*\.?/gm)[0]; //append to the first dot
-                if(movTemp.match(/\d*\s*\.$/))movTemp = movTemp.replace(/\s*\d*\.$/gm, ""); //remove ending digitdots
-				//alert(movTemp);
-                pgnText = pgnText.substr(movTemp.length);
-
-                movTemp = movTemp.replace(/^\s*/gm, "");
-                movTemp = movTemp.replace(/^\d*[^\.]*\.\s*/gm, "");
-                
-                movTemp = " " + movTemp;
-                mov += movTemp;
-
-            }
-        
-            //mov = mov.replace(Re.TrailingSpaces, "");
-            xdocument.game.move[i] = new String();
-            xdocument.game.move[i].moveNumber = movNoCurrent; //TODO: move number is never used
-            mov = mov.replace(Re.TrailingSpaces, "");
-            xdocument.game.move[i].fullText = mov;
-        
-            if (i > 0)
-            {
-                xdocument.game.move[i].white_move = this.GetMove(mov, 0);
-                xdocument.game.move[i].black_move = this.GetMove(mov, 1);
-            }else
-            {
-                if (MoveType == 1)
-                {
-                   xdocument.game.move[i].white_move = "";
-                   xdocument.game.move[i].black_move = this.GetMove(mov, 0);
-                }else
-                {
-                   xdocument.game.move[i].white_move = this.GetMove(mov, 0);
-                   xdocument.game.move[i].black_move = this.GetMove(mov, 1);
-                }
-            }
-        
-            //pgnText = pgnText.replace(/^\d+\s*\.[^\d]*/gm, "$`");
-            pgnText = pgnText.replace(Re.TrailingSpaces, "");
-            appendLog.call (this, "mov[" + i + "]: " + mov + "; white: " + xdocument.game.move[i].white_move + "; black: " + xdocument.game.move[i].black_move);
-        } 
-       
-    }
     function ParseAllPgn (pgn)
     {
        try
        {
-          var pgnText = pgn;
-
+          var i;
+          i = 0;
+          i++;
+          var pgnText;
+          if(pgn) pgnText = pgn;
+    
+          var  prop, mov;
           pgnText = xdocument.BoardForm.PgnMoveText.value;//"[salut la toti] \r\n[norok la toti] salutari\r\n\r\n   ";
 
           appendLog.call (this,"ParseAllPgn: before Clean");
-          pgnText = pgnText.replace(/(\{.*?\})/gm, " ");  //TODO: get rid of remove comments
-          pgnText = pgnText.replace(Re.TrailingSpaces,  "");    //trim
-          pgnText = pgnText.replace(/[\t ]+/gm,     " ");  //replace multiple tabs, and spaces
+          pgnText = pgnText.replace(/[\n\t\r]/gm,     " ");  //replace tabs, newlines and carriage returns
+          pgnText = pgnText.replace(/(\{[^\}]*\})/gm, " ");  //remove comments
+          pgnText = pgnText.replace(/(^\s*|\s*$)/gm,  "");    //trim
           pgnText = pgnText.replace(/(^[,\.\"\'\s]*|[,\.\"\'\s]*$)/gm,  "");    //trim
-          appendLog.call (this, "ParseAllPgn: after Clean, parse properties");
-
-		  pgnText = ParsePgnProperties.call (this, pgnText);
+          //FenString = StandardFen
+          var xfen;
+          var i;
+          appendLog.call (this, "ParseAllPgn: after Clean");
+          for(i = 0; i < 2000 && pgnText.match(/.*\[.*/gm);  i++)
+          {
+             appendLog.call (this, "ParseAllPgn: parsing tags");
+             prop = pgnText.match(/^[^\[]*\[[^\]]*?\]/gm)[0];
+             this.insertLog("prop: {" + prop + "}");
+             prop = prop.replace(/(^\s*|\s*$)/gm, "");
+             xdocument.game.prop[i] = prop;
+             var reFEN = new RegExp("[^\\[]*" + "\\[FEN\\s+[\"']*\\s*" + "([^\"']*)" + "\\s*[\"']*\\s*]\\s*", "ig");
+             var arr = reFEN.exec(prop);
+             if(arr != null && arr.length == 2)
+             {
+                FenString = arr[1];
+             }
+             reFEN = null;
+    
+             pgnText = pgnText.replace(/^[^\[]*\[[^\]]*?\]/gm, "");//"$`");
+             pgnText = pgnText.replace(/(^\s*|\s*$)/gm,        "");
+          }
           appendLog.call (this, "ParseAllPgn: before Init");
           try
           {
@@ -842,8 +654,76 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              //appendLog.call (this, "err: ParseAllPgn() on Init(''):" + err);
              throw "rethrow: ParseAllPgn() from Init(''):" + "\n" + err;
           }
-		  ParsePgnMoves.call (this, pgnText);
-
+          
+          //appendLog.call (this, "ParseAllPgn: before loop");
+          for (i = 0; i < 6000 && pgnText.match(/^\d+\s*\./gm);  i++)
+          {
+             //appendLog.call (this, "ParseAllPgn: inside loop");
+             var movNoCurrent, movNoNext;
+             
+             mov = pgnText.match(/^\d+\s*\.+[^\.]+\.?/gm)[0];
+             movNoCurrent = mov.match(/^\d*/gm)[0];
+             if (mov.match(/\d*\s*\.$/)) mov = mov.replace(/\s*\d*\.$/gm, "");
+             pgnText = pgnText.substr(mov.length);
+             pgnText = pgnText.replace(/(^\s*|\s*$)/gm, "");
+             
+             movNoNext = pgnText.match(/^\d*/gm)[0];
+    
+             mov = mov.replace(/^\s*/gm, "");
+             mov = mov.replace(/^\d*[^\.]*\.\s*/gm, "");
+    
+             if ( movNoCurrent == movNoNext )
+             {
+                //var movTemp = pgnText.match(/^\d*\s*\.[^\.]*\.?/gm)[0];
+                var movTemp = "";
+                var pgnTemp = pgnText;
+                //movTemp += movNoCurrent;
+                if (pgnTemp.match(/^\d+\s*\.\.\.\s*/gm))
+                {
+                    movTemp = pgnTemp.match(/^\d+\s*\.\.\.\s*/gm)[0];
+                    pgnTemp = pgnTemp.substr(movTemp.length);
+                }
+                movTemp += pgnTemp.match(/^[^\.]*\.?/gm)[0];
+                if(movTemp.match(/\d*\s*\.$/))movTemp = movTemp.replace(/\s*\d*\.$/gm, "");
+                pgnText = pgnText.substr(movTemp.length);
+    
+                movTemp = movTemp.replace(/^\s*/gm, "");
+                movTemp = movTemp.replace(/^\d*[^\.]*\.\s*/gm, "");
+    
+                movTemp = " " + movTemp;
+                mov += movTemp;
+                
+                
+             }
+    
+             //mov = mov.replace(/(^\s*|\s*$)/gm, "");
+             xdocument.game.move[i] = new String();
+             xdocument.game.move[i].moveNumber = movNoCurrent;
+             mov = mov.replace(/(^\s*|\s*$)/gm, "");
+             xdocument.game.move[i].fullText = mov;
+    
+             if (i > 0)
+             {
+                xdocument.game.move[i].white_move = this.GetMove(mov, 0);
+                xdocument.game.move[i].black_move = this.GetMove(mov, 1);
+             }else
+             {
+                if(MoveType == 1)
+                {
+                   xdocument.game.move[i].white_move = "";
+                   xdocument.game.move[i].black_move = this.GetMove(mov, 0);
+                }else
+                {
+                   xdocument.game.move[i].white_move = this.GetMove(mov, 0);
+                   xdocument.game.move[i].black_move = this.GetMove(mov, 1);
+                }
+             }
+    
+             //pgnText = pgnText.replace(/^\d+\s*\.[^\d]*/gm, "$`");
+             pgnText = pgnText.replace(/(^\s*|\s*$)/gm, "");
+             appendLog.call (this, "mov: " + mov + "; white: " + xdocument.game.move[i].white_move + "; black: " + xdocument.game.move[i].black_move);
+          } 
+          
        }
        catch (err)
        {

@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Roatta Waaayyyy!!!",
+  "version": "1.0.0.4",
+
+  "description": "Chess AddIn for Firefox",
+
+  "icons": {
+    //"16": "icons/icon_16.png",
+    "32": "icons/roatta_32_32.jpg" //, //"icons/icon_32.png",
+    //"48": "icons/icon_48.png",
+    //"96": "icons/icon_96.png"
+  },
+  "permissions":
+  [
+    //"http://api.flickr.com/",
+	//"tabs",
+	"contextMenus",
+	//"notifications"
+  ],
+  //"content_scripts": [
+  //  {
+  //    "matches": ["<all_urls>"],
+  //    "js": ["chrome_listener.js"] //"first.js"]
+  //  }
+  //],
+
+  "background": {
+    "scripts": ["background.js"]
+  }
+
+}

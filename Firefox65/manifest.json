@@ -15,7 +15,7 @@
   [
     //"http://api.flickr.com/",
 	//"tabs",
-	"contextMenus",
+	"contextMenus"
 	//"notifications"
   ],
   //"content_scripts": [

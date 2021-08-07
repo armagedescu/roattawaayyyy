@@ -10,7 +10,7 @@ function menuCommandPlaySmallBoard (info, tab)
 {
    try
    {
-      playBoard   (info, tab, "status = 1, height = 350, width = 350, resizable = 0, scrollbars=0", "mini18");
+      playBoard   (info, tab, {height : 350, width : 350}, "mini18");
    }
    catch (err)
    {
@@ -21,91 +21,50 @@ function menuCommandPlayMediumBoard (info, tab)
 {
    try
    {
-       playBoard   (info, tab, "status = 1, height = 450, width = 450, resizable = 0, scrollbars=0", "medium35");
+       playBoard   (info, tab, {height : 450, width : 450}, "medium35");
    }
    catch (err)
    {
    }
 }
 
-function handleResponse(message)
-{
-   console.log("background.handleResponse");
-   console.log(`background script sent a response: ${message.response}`);
-   console.log("background.handleResponse end");
-}
-
-function handleError(error)
-{
-   console.log("background.handleError");
-   console.log(`Error: ${error}`);
-   console.log("background.handleError end");
-}
-
-function onCreated(windowInfo, request)
-{
-   console.log("background.sending onCreated ");
-
-   browser.windows.get(windowInfo.id).then
-   (
-      (wnd) =>
-      {
-		 console.log("background.onCreated Creation listener there is: "  + wnd.id);
-         //chrome.runtime.sendMessage
-         browser.runtime.sendMessage(request);
-         //({
-         //      chessObject:
-         //      {
-         //         gametype : "PGN_OR_FEN_board",
-         //         //content : selection,
-         //         //imgPath : imagePath
-         //      }
-         //});
-		 console.log("background.onCreated sent message");
-      }
-   );
-
-   console.log("background.sending onCreated end");
-}
-
-function onError(error) {
-  console.log("background.sending onError");
-  //console.log(`Error: ${error}`);
-  console.log("background.sending onError end");
-}
-
 function playBoard (info, tab, windowAttributes, imagePath)
 {
-   let selection = info.selectionText;
-   var createData = {
+   //let selection = info.selectionText;
+   var createData =
+   {
       type  : "detached_panel",
-      url   : "pop.html?boardType=" + imagePath + "&PGN=" + encodeURIComponent(info.selectionText),
-      width : 250,
-      height: 100
+      url   : "board.html",
+      width : windowAttributes.width,
+      height: windowAttributes.height
 
    };
 
-   let request =
+   let requestData =
       {
          chessObject:
          {
             gametype : "PGN_OR_FEN_board",
-            content : selection,
+            content :  info.selectionText,
             imgPath : imagePath
          }
       };
    try
    {
       console.log ("Play Board: " + imagePath);
-      console.log (info.selectionText);
-      console.log ("Extension URL: " + browser.runtime.getURL("pop.html?boardType=" + imagePath + "&PGN=" + encodeURIComponent(info.selectionText)));
-      console.log ("Extension URL: " + browser.runtime.getURL("pop.html?boardType=" + imagePath + "&PGN=" + decodeURIComponent(encodeURIComponent(info.selectionText))));
+      console.log ("Selection: " + info.selectionText);
 
       let creating = browser.windows.create(createData);
-      creating.then((inf) => {onCreated (inf, request)}, onError);
+      
+      function onGameDataExchange(request)
+      {
+          browser.runtime.onMessage.removeListener(onGameDataExchange);
+          return Promise.resolve(requestData);
+      }
 
+      browser.runtime.onMessage.addListener (onGameDataExchange);
 
-      console.log ("opened pop.html");
+      console.log ("opened board.html");
 
    }
    catch (err)

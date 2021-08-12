@@ -7,29 +7,33 @@
 //and initialized variable is reset back to null
 //keep comment for diffs
 
-// chrome bridge to board_doc_main
-chrome.extension.onRequest.addListener
-(     
-   function(request, sender, sendResponse)
+
+console.log("document.addEventListener");
+document.addEventListener('DOMContentLoaded',
+   (event) =>
    {
-      console.log(sender.tab ?
-              "from a content script:" + sender.tab.url :
-              "from the extension");
-      if (request.chessObject.gametype == "PGN_OR_FEN_board")
-      {
-		 board_doc_main(request.chessObject);	
-      }
-      else
-      {
-         sendResponse({});
-         return;
-      }
+     chrome.extension.sendRequest
+        (
+           {
+              chessObject:
+              {
+                 gametype : "PGN_OR_FEN_board"
+              }
+           },
+           (request) =>
+           {
+              console.log("response received: " + JSON.stringify(request));
+              if (request.chessObject.gametype == "PGN_OR_FEN_board")
+              {
+                 board_doc_main(request.chessObject);    
+              }
+           }
+        );
+      console.log("Popup DOMContentLoaded send message end");
+
    }
-)
-//browser specific timer implementation
-//FF requires nsITimer
-//all other browsers will use standard mechanism,
-//with Stub aliases, for portability
+);
+console.log("document.addEventListener end");
 
 var clearTimeoutStub = clearTimeout;
 var setTimeoutStub   = setTimeout;

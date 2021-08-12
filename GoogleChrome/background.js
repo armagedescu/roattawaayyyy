@@ -11,55 +11,55 @@ function menuCommandPlaySmallBoard (info, tab)
    console.log("play small board");
    try
    {
-      playBoard   (info, tab, "status = 1, height = 350, width = 350, resizable = 0, scrollbars=0", "mini18");
+      playBoard   (info, tab, {url:"board.html", type: "popup", height: 350, width: 350}, "mini18");
    }
    catch (err)
    {
+      console.log("error: background - " + err);
    }
 }
 function menuCommandPlayMediumBoard (info, tab)
 {
    try
    {
-      playBoard   (info, tab, "status = 1, height = 450, width = 450, resizable = 0, scrollbars=0", "medium35");
+      playBoard   (info, tab, {url:"board.html", type: "popup", height: 450, width: 450}, "medium35");
    }
    catch (err)
    {
+      console.log("error: background - " + err);
    }
 }
-
 
 function playBoard (info, tab, windowAttributes, imagePath)
 {
    try
    {
-      open("board.html", "myWindow", windowAttributes);
-      setTimeout(function()
-	       {
-              try
-              {
-	             var selection = "";
-	             if (info.selectionText) selection = info.selectionText;
-                 chrome.extension.sendRequest
-                    (
-                       {
-                          chessObject:
-                          {
-                             gametype : "PGN_OR_FEN_board",
-                             content : selection,
-                             imgPath : imagePath
-                          }
-                       },
-                       function(response)
-                       {
-                          console.log(response.info);
-                       }
-                    );
-              }catch(err){}
-           }, 100);
+       let request = {
+                        chessObject:
+                        {
+                           gametype : "PGN_OR_FEN_board",
+                           content : info.selectionText,
+                           imgPath : imagePath
+                        }
+                     };
+
+      chrome.windows.create(windowAttributes);
+      
+      function onGameDataExchange(boardrequest, sender, sendResponse)
+      {
+         chrome.extension.onRequest.removeListener(onGameDataExchange);
+         console.log("OnDataExchange");
+         sendResponse (request);
+         return Promise.resolve('onGameDataExchange response');
+      }
+
+      console.log("background adding listener");
+      chrome.extension.onRequest.addListener (onGameDataExchange);
+      console.log("background adding listener end");
    }
    catch (err)
    {
-      throw "main background playBoard()> " + err;
+      console.log( "Error: main background playBoard()> " + err);
    }
 }
+

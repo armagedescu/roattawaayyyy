@@ -1,32 +1,21 @@
 //Application specific interactions, this is application dependent
 //All the compatibility and portability issues should be solved here
 
-//The only global variable,
-//in FF should be placed in HTML inline javascript
-//because in FF script is evaluated twice,
-//and initialized variable is reset back to null
-//keep comment for diffs
-
 // chrome bridge to board_doc_main
-chrome.extension.onRequest.addListener
-(     
-   function(request, sender, sendResponse)
+document.addEventListener('DOMContentLoaded',
+   (event) =>
    {
-      console.log(sender.tab ?
-              "from a content script:" + sender.tab.url :
-              "from the extension");
-      if (request.chessObject.gametype == "PGN_OR_FEN_board")
-      {
-		 board_doc_main(request.chessObject);	
-      }
-      else
-      {
-         sendResponse({});
-         return;
-      }
+      chrome.runtime.sendMessage({ chessObject: { gametype : "PGN_OR_FEN_board" } },
+          (request) => //in fact is response, but is requested response
+          {
+             console.log("response> " + JSON.stringify(request));
+             board_doc_main(request.chessObject);
+          });
+      console.log("Popup DOMContentLoaded send message end");
+      
    }
-)
-//browser specific timer implementation
+);
+
 //FF requires nsITimer
 //all other browsers will use standard mechanism,
 //with Stub aliases, for portability

@@ -1,65 +1,78 @@
 //Google chrome specific script
 
-console.log("salut");
-var id      = chrome.contextMenus.create({"title": "Roatta waayyy!!!", "contexts":["selection", "page"]});
-var childId = chrome.contextMenus.create({"title": "Play Small",       "contexts":["selection", "page"], "parentId": id, "onclick": menuCommandPlaySmallBoard});
-var childId = chrome.contextMenus.create({"title": "Play Medium",      "contexts":["selection", "page"], "parentId": id, "onclick": menuCommandPlayMediumBoard});
-console.log("add context menus");
+console.log("global> add context menus");
+var id      = chrome.contextMenus.create({"id":"Roatta Waaayyyy!!!",        "title": "Roatta waayyy!!!", "contexts":["selection", "page"]});
+var childId = chrome.contextMenus.create({"id":"Roatta Waaayyyy!!! small",  "title": "Play Small",       "contexts":["selection", "page"], "parentId": id}); //, "onClicked": menuCommandPlaySmallBoard});
+var childId = chrome.contextMenus.create({"id":"Roatta Waaayyyy!!! medium", "title": "Play Medium",      "contexts":["selection", "page"], "parentId": id}); //, "onClicked": menuCommandPlayMediumBoard});
+console.log("back.js:global> added context menus");
 
-function menuCommandPlaySmallBoard (info, tab)
+function menuCommandPlaySmallBoard (info)
 {
-   console.log("play small board");
    try
    {
-      playBoard   (info, tab, "status = 1, height = 350, width = 350, resizable = 0, scrollbars=0", "mini18");
+      playBoard   (info, "mini18", {url: "board.html", type:"popup", height : 350, width : 350});
    }
    catch (err)
    {
+      console.log( "Error: menuCommandPlaySmallBoard()> " + err);
    }
 }
-function menuCommandPlayMediumBoard (info, tab)
+function menuCommandPlayMediumBoard (info)
 {
    try
    {
-      playBoard   (info, tab, "status = 1, height = 450, width = 450, resizable = 0, scrollbars=0", "medium35");
+      playBoard   (info, "medium35", {url: "board.html", type:"popup", height: 450, width: 450});
    }
    catch (err)
    {
+      console.log( "Error: menuCommandPlayMediumBoard()> " + err);
    }
 }
 
+function onGameDataExchange(request, sender, sendResponse)
+{
+   return 'salut response';
+}
 
-function playBoard (info, tab, windowAttributes, imagePath)
+chrome.contextMenus.onClicked.addListener((info, tab) =>
+{
+    console.log("menus.onClicked:menuId> "     + info.menuItemId);
+    console.log("menus.onClicked:selection> " + info.selectionText);
+    let imgPath = "", windowCreation = {};
+    if (info.menuItemId === "Roatta Waaayyyy!!! small")
+        menuCommandPlaySmallBoard (info);
+    else if (info.menuItemId === "Roatta Waaayyyy!!! medium")
+        menuCommandPlayMediumBoard (info);
+	console.log("menus.onClicked:menuId> end");
+});
+
+function playBoard (info, imgPath, windowAttributes)
 {
    try
    {
-      open("board.html", "myWindow", windowAttributes);
-      setTimeout(function()
-	       {
-              try
-              {
-	             var selection = "";
-	             if (info.selectionText) selection = info.selectionText;
-                 chrome.extension.sendRequest
-                    (
-                       {
-                          chessObject:
-                          {
-                             gametype : "PGN_OR_FEN_board",
-                             content : selection,
-                             imgPath : imagePath
-                          }
-                       },
-                       function(response)
-                       {
-                          console.log(response.info);
-                       }
-                    );
-              }catch(err){}
-           }, 100);
+      let gameObject = {
+                     chessObject:
+                     {
+                        gametype : "PGN_OR_FEN_board",
+                        content : info.selectionText,
+                        imgPath : imgPath
+                     }
+                  };
+      let windowPromise = chrome.windows.create(windowAttributes);
+      windowPromise.then((value) => {
+        console.log("menus.Clicked.Listener:window.then> " + JSON.stringify(value));
+        chrome.runtime.onMessage.addListener(
+            (request, sender, sendResponse) =>
+            {
+              console.log("onMessage> " + gameObject.chessObject.content);
+              sendResponse(gameObject);
+            }
+          );
+      });
+
    }
    catch (err)
    {
-      throw "main background playBoard()> " + err;
+      console.log( "Error: playBoard()> " + err);
    }
 }

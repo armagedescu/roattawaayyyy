@@ -45,19 +45,22 @@ function xdocument_gen()
    
 }
 
-function IVFChessGame(imgPath, chessContent, listenerUpdater, errDiv, chessBoard)
+function IVFChessGame(imgPath, chessContent, listenerUpdater, chessBoard)
 {
 //{events
-this.btnFlipBoardListener   = function () {try { flipBoard.call(this);          } catch (err)  { alert(err); }    } //TODO: move Move* functions to class member
-this.btnInitListener        = function () {try { Init.call(this, '');           } catch (err)  { alert(err); }    } 
-this.btnMoveBackListener    = function () {try { this.MoveBack(1);              } catch (err)  { alert(err); }    }
-this.btnMoveForwardListener = function () {try { this.MoveForward(1);           } catch (err)  { alert(err); }    }
-this.btnMoveLastListener    = function () {try { this.MoveForward(1000);        } catch (err)  { alert(err); }    }
-this.btnGetFENListener      = function () {try { this.GetFEN();                 } catch (err)  { alert(err); }    }
-this.btnShowFENListListener = function () {try { this.ShowFENList();            } catch (err)  { alert(err); }    }
-this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         } catch (err)  { alert(err); }    }
+this.btnFlipBoardListener   = () => {try { flipBoard.call(this);   } catch (err)  { console.log (err); } } //TODO: move Move* functions to class member
+this.btnInitListener        = () => {try { Init.call(this, '');    } catch (err)  { console.log (err); } } 
+this.btnMoveBackListener    = () => {try { this.MoveBack(1);       } catch (err)  { console.log (err); } }
+this.btnMoveForwardListener = () => {try { this.MoveForward(1);    } catch (err)  { console.log (err); } }
+this.btnMoveLastListener    = () => {try { this.MoveForward(1000); } catch (err)  { console.log (err); } }
+this.btnGetFENListener      = () => {try { this.GetFEN();          } catch (err)  { console.log (err); } }
+this.btnShowFENListListener = () => {try { this.ShowFENList();     } catch (err)  { console.log (err); } }
+this.btnPlayListener        = () => {try { this.SwitchAutoPlay();  } catch (err)  { console.log (err); } }
 //}end events
-    var errordiv = errDiv;
+    //TODO: get rid of this
+    this.appendLog     = (logStr) => { console.log(logStr); }
+
+
     var xdocument = new xdocument_gen();  //document stub/simulator TODO: to remove
 
     //public:
@@ -181,11 +184,9 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     this.timeProcessor = new timerWrapper(this);
 ///////////////////////////////////////////////
     //TODO: split very long function variable_reset
-    this.variable_reset = function()
+    this.variable_reset = () =>
     {
        var chessGame = this;
-       //errordiv    = document.getElementById("error_div");      //from static HTML content
-       //chess_board = document.getElementById('chess_board');    //from static HTML content
 
        dragPiece[0] = -1;
        dragPiece[4] = -1;
@@ -196,61 +197,17 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           for (var j = 0; j < 16; j++)
              Piece[i][j] = {Type:null,Pos:{X:null,Y:null},Moves:null};
 
-	    chessGame.boardWriter.call (chessGame, function (){listenerUpdater(chessGame);});
-        chessGame.startParsingDetect_FEN_PGN.call (chessGame); //TODO: too many initialization functions
+       chessGame.boardWriter.call (chessGame, function (){listenerUpdater(chessGame);});
+       chessGame.startParsingDetect_FEN_PGN.call (chessGame); //TODO: too many initialization functions
 
     }
 
-    //TODO: log probably better to separate
-    function appendLog(logStr)
-    {
-       try
-       {
-          if(logStr)
-          {
-             errordiv.appendChild(document.createElement("br"));
-             errordiv.appendChild(document.createTextNode(logStr));
-          }
-       }
-       catch(err)
-       {
-          alert("error on appendLog.call (this, " + logStr + ")" + err); //report but don't rethrow
-       }
-    }
-    this.insertLog = function (logStr)
-    {
-       try
-       {
-          errordiv.innerText += "";
-          errordiv.insertBefore(document.createElement("br"),    errordiv.firstChild);
-          errordiv.insertBefore(document.createTextNode(logStr), errordiv.firstChild);
-       }catch(err)
-       {
-          alert("error on this.insertLog(" + logStr + ")" + err); //report but don't rethrow
-       }
-    }
-    function clearLog (logStr)
-    {
-       try
-       {
-          errordiv.innerHTML = ""; //clear here
-          if (logStr)
-          {
-             appendLog.call (this,logStr); //log replacement if any
-          }
-       }
-       catch (err)
-       {
-          alert("error on this.insertLog(" + logStr + ")" + err); //report but don't rethrow
-       }
-    }
-
-    this.SetImagePath  = function (imgPath) //public
+    this.SetImagePath  = (imgPath) => //public
     {
        try
        {
           ImgResourcePath = imgPath;
-          this.insertLog("SetImagePath(imgPath = " + imgPath + ")() ImgResourcePath{" + ImgResourcePath + "}*****************");
+          this.appendLog("SetImagePath(imgPath = " + imgPath + ")() ImgResourcePath{" + ImgResourcePath + "}*****************");
        }catch(err)
        {}
     }
@@ -507,7 +464,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 if (ll < FenString.length) cc = FenString.charAt(ll++);
                 else cc = " ";
              }
-             this.insertLog("FEN EnPass: " + EnPass);
+             this.appendLog("FEN EnPass: " + EnPass);
     
              if (ll == FenString.length)
              {
@@ -531,7 +488,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 else cc = " ";
                 fullProgressDone |= HALF_MOVE_PARSED;
              }
-             this.insertLog("FEN half move No: " + HalfMove[0]);
+             this.appendLog("FEN half move No: " + HalfMove[0]);
              if (ll == FenString.length)
              {
                 throw "Invalid FEN [16]: char " + ll + " missing fullmove number";
@@ -541,7 +498,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              cc = FenString.substring(ll++);
              //cc = cc.replace(/^\s*|\s*$)/gi, "");
              cc = cc.match(/^\s*(\d+)[^\d]*/)[1];
-             this.insertLog ("FEN cc is: {" + cc + "}");
+             this.appendLog ("FEN cc is: {" + cc + "}");
              if (isNaN(cc))
              {
                 throw "Invalid FEN [17]: char " + ll + " invalid fullmove number;" + FenString.substring(0, ll);
@@ -555,7 +512,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 //return;
              }
              StartMove += 2 * (parseInt(cc) - 1); //TODO: check halfmoves
-             this.insertLog("FEN start move No: " + StartMove);
+             this.appendLog("FEN start move No: " + StartMove);
              for (ii = 0; ii < 8; ii++)
              {
                 for (jj = 0; jj < 8; jj++) this.Board[ii][jj] = 0;
@@ -591,21 +548,20 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              //{
              //   xdocument.game.move[0].black_move = xdocument.game.move[0].white_move;
             //    xdocument.game.move[0].white_move = 0;
-                //this.insertLog("StartMove black");
+                //this.appendLog("StartMove black");
              //}
              //end
           }
-          this.insertLog("StartMove=" + StartMove + ";MoveType=" + MoveType);
+          this.appendLog("StartMove=" + StartMove + ";MoveType=" + MoveType);
           this.UpdateBoardAndPieceImages();
        }
        catch (err)
        {
-          //this.insertLog ('init>>error: ' + err);
           throw 'rethrow init() >>error: ' + err;
        }
     }
 
-    function ParseAllPgn (pgn)
+    this.ParseAllPgn  = (pgn) =>
     {
        try
        {
@@ -618,7 +574,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           var  prop, mov;
           pgnText = xdocument.BoardForm.PgnMoveText.value;//"[salut la toti] \r\n[norok la toti] salutari\r\n\r\n   ";
 
-          appendLog.call (this,"ParseAllPgn: before Clean");
+          this.appendLog.call (this, "ParseAllPgn: before Clean");
           pgnText = pgnText.replace(/[\n\t\r]/gm,     " ");  //replace tabs, newlines and carriage returns
           pgnText = pgnText.replace(/(\{[^\}]*\})/gm, " ");  //remove comments
           pgnText = pgnText.replace(/(^\s*|\s*$)/gm,  "");    //trim
@@ -626,12 +582,12 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           //FenString = StandardFen
           var xfen;
           var i;
-          appendLog.call (this, "ParseAllPgn: after Clean");
+          this.appendLog.call (this, "ParseAllPgn: after Clean");
           for(i = 0; i < 2000 && pgnText.match(/.*\[.*/gm);  i++)
           {
-             appendLog.call (this, "ParseAllPgn: parsing tags");
+             this.appendLog.call (this, "ParseAllPgn: parsing tags");
              prop = pgnText.match(/^[^\[]*\[[^\]]*?\]/gm)[0];
-             this.insertLog("prop: {" + prop + "}");
+             this.appendLog("prop: {" + prop + "}");
              prop = prop.replace(/(^\s*|\s*$)/gm, "");
              xdocument.game.prop[i] = prop;
              var reFEN = new RegExp("[^\\[]*" + "\\[FEN\\s+[\"']*\\s*" + "([^\"']*)" + "\\s*[\"']*\\s*]\\s*", "ig");
@@ -645,7 +601,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
              pgnText = pgnText.replace(/^[^\[]*\[[^\]]*?\]/gm, "");//"$`");
              pgnText = pgnText.replace(/(^\s*|\s*$)/gm,        "");
           }
-          appendLog.call (this, "ParseAllPgn: before Init");
+          this.appendLog.call (this, "ParseAllPgn: before Init");
           try
           {
              Init.call (this, '');
@@ -721,7 +677,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     
              //pgnText = pgnText.replace(/^\d+\s*\.[^\d]*/gm, "$`");
              pgnText = pgnText.replace(/(^\s*|\s*$)/gm, "");
-             appendLog.call (this, "mov: " + mov + "; white: " + xdocument.game.move[i].white_move + "; black: " + xdocument.game.move[i].black_move);
+             this.appendLog.call (this, "mov: " + mov + "; white: " + xdocument.game.move[i].white_move + "; black: " + xdocument.game.move[i].black_move);
           } 
           
        }
@@ -733,7 +689,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     }
 
 	//TODO: this function allow drag&drop. Consider investigating
-    this.AllowRecording = function(bb)
+    this.AllowRecording = (bb) =>
     {
        if ((document.BoardForm) && (document.BoardForm.Recording))
           document.BoardForm.Recording.checked = bb;
@@ -741,9 +697,9 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
        this.SetBoardClicked (-1);
     }
 
-    this.startParsingDetect_FEN_PGN = function()
+    this.startParsingDetect_FEN_PGN = () =>
     {
-        this.insertLog("startParsingDetect_FEN_PGN()");
+        this.appendLog("startParsingDetect_FEN_PGN()");
         var isFen = false;
         try
         {
@@ -755,20 +711,20 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
         catch (err)
         {
            isFen = false;
-           this.insertLog("startParsingDetect_FEN_PGN(): catch is not fen");
+           this.appendLog("startParsingDetect_FEN_PGN(): catch is not fen");
         }
         try
         {
            if (!isFen)
            {
 
-              this.insertLog("startParsingDetect_FEN_PGN(): try PGN");
+              this.appendLog("startParsingDetect_FEN_PGN(): try PGN");
               this.ApplyFEN('');
               xdocument.BoardForm.PgnMoveText.value = contentSelectedText;
-              this.insertLog("startParsingDetect_FEN_PGN() start ParseAllPgn('" + contentSelectedText + "')");
-              ParseAllPgn.call(this, contentSelectedText); //TODO: check passing a copy of contentSelectedText
+              this.appendLog("startParsingDetect_FEN_PGN() start ParseAllPgn('" + contentSelectedText + "')");
+              this.ParseAllPgn.call(this, contentSelectedText); //TODO: check passing a copy of contentSelectedText
            }
-           this.insertLog("after init image path{" + ImgResourcePath + "}");
+           this.appendLog("after init image path{" + ImgResourcePath + "}");
         }
         catch (err)
         {
@@ -779,7 +735,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     //member
     this.UpdateBoardAndPieceImages = function() //TODO: to review usefullness of this function
     {
-       this.insertLog("UpdateBoardAndPieceImages:");
+       this.appendLog("UpdateBoardAndPieceImages:");
        try
        {
           //TODO: remove this trash
@@ -809,7 +765,6 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           board.IMGFlipElement.src    =    flip_image;
        }catch(e)
        {
-           //this.insertLog("catch: UpdateBoardAndPieceImages()\n" + e);
            throw "\nrethrow: UpdateBoardAndPieceImages()" + e;
        }
     }
@@ -2028,7 +1983,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
 
     this.MoveForward = function (nMoveNumber, rr)
     {
-       this.insertLog("MoveForward(nMoveNumber=" + nMoveNumber + ", rr=" + rr + ")");
+       this.appendLog("MoveForward(nMoveNumber=" + nMoveNumber + ", rr=" + rr + ")");
        try
        {
           var ii, llst, ssub, mmove0 = "", mmove1 = "";//,ssearch,ffst=0,ffull;
@@ -2039,14 +1994,14 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 ShortPgnMoveText[0][CurVar] = xdocument.BoardForm.PgnMoveText.value;
              if (BoardClicked >= 0) this.SetBoardClicked(-1);
           }
-          this.insertLog("MoveForward(nMoveNumber=" + nMoveNumber + ", rr=" + rr + ")MoveCount=" + MoveCount + ";len=" + xdocument.game.move.length);
+          this.appendLog("MoveForward(nMoveNumber=" + nMoveNumber + ", rr=" + rr + ")MoveCount=" + MoveCount + ";len=" + xdocument.game.move.length);
           if(nMoveNumber > xdocument.game.move.length * 2 - (MoveCount - StartMove)) nMoveNumber  = xdocument.game.move.length * 2 - (MoveCount - StartMove);
           for (ii = 0; (ii < nMoveNumber) && ((MoveCount - StartMove) < xdocument.game.move.length * 2); ii++) 
           {
              //ssearch = Math.floor(MoveCount / 2 + 2) + ".";
              //var idx  = (MoveCount & 0xfffffffe) >> 1 ;
              var idx  = (MoveCount + (StartMove & 1) - StartMove) >> 1;
-             this.insertLog("MoveForward(nMoveNumber, rr)MoveCount{"+MoveCount+"};StartMove{" + StartMove + "}ii={" + ii + "}idx={"+ idx +"}; nMoveNumber={" + nMoveNumber + "};len=" + xdocument.game.move.length);
+             this.appendLog("MoveForward(nMoveNumber, rr)MoveCount{"+MoveCount+"};StartMove{" + StartMove + "}ii={" + ii + "}idx={"+ idx +"}; nMoveNumber={" + nMoveNumber + "};len=" + xdocument.game.move.length);
              //ssearch = (2 + idx) + ".";
              //llst = ffull.indexOf(ssearch);
              //ssearch = Math.floor(MoveCount / 2 + 1) + ".";
@@ -2064,7 +2019,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                    ssub = ffull.substring(ffst, llst);
                 }*/
                 ssub = xdocument.game.move[idx].fullText;
-                this.insertLog("GetMove(ssub={" + ssub + "}, MoveType = {" + MoveType + "})");
+                this.appendLog("GetMove(ssub={" + ssub + "}, MoveType = {" + MoveType + "})");
                 //mmove0 = GetMove(ssub, MoveType);
                 if(MoveType == 0)
                 {
@@ -2074,7 +2029,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                 {
                    mmove0 = xdocument.game.move[idx].black_move;
                 }
-                //this.insertLog("mmove0 = {" + mmove0 + "}");
+                //this.appendLog("mmove0 = {" + mmove0 + "}");
                 if (mmove0 != "")
                 {
                    if (this.ParseMove(mmove0, true) > 0)
@@ -2095,7 +2050,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                       if (MoveType == 1)
                       {
                          ssub = Math.floor(MoveCount / 2 + 1);
-                         this.insertLog("else if MoveType == 1 (ssub={" + ssub + "}");
+                         this.appendLog("else if MoveType == 1 (ssub={" + ssub + "}");
                          ssearch = ssub + "....";
                          ffst = ffull.indexOf(ssearch);
                          if (ffst < 0) { ssearch = ssub + ". ..."; ffst = ffull.indexOf(ssearch); }
@@ -2106,8 +2061,8 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
                          if (ffst>=0)                                    
                          {
                             ffst+=ssearch.length;
-                            if (llst<0) {ssub=ffull.substring(ffst); this.insertLog("1 if llst lt 0 (ssub={" + ssub + "}");}
-                            else {ssub=ffull.substring(ffst, llst); this.insertLog("1 if llst lt 0 : else (ssub={" + ssub + "}");}
+                            if (llst<0) {ssub=ffull.substring(ffst); this.appendLog("1 if llst lt 0 (ssub={" + ssub + "}");}
+                            else {ssub=ffull.substring(ffst, llst); this.appendLog("1 if llst lt 0 : else (ssub={" + ssub + "}");}
                             
                             mmove0=GetMove(ssub,0);
                             if (mmove0!="")
@@ -2414,7 +2369,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
           document.getElementById("FEN").value = xdocument.BoardForm.FEN.value;//TODO: to centralize
        }catch(err)
        {
-          this.insertLog("norethrow/surpress failed to write FEN: " + err); //surpressed
+          this.appendLog("norethrow/surpress failed to write FEN: " + err); //surpressed
        }
        return(ss);
     }
@@ -3069,7 +3024,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
     {
         try
         {
-        
+
            var tableElement = document.createElement("table");
            tableElement.border      = 0;
            tableElement.cellPadding = 0;
@@ -3115,7 +3070,7 @@ this.btnPlayListener        = function () {try { this.SwitchAutoPlay();         
         
         }catch(err)
         {
-           alert('error: boardWriter() ' + err);
+           console.log('error: boardWriter() ' + err);
         }
     
     }	

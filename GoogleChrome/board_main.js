@@ -9,7 +9,7 @@ function allowDrop(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog.call(chessGame, err);
+	  console.log("board_doc_main:allowDrop> " + err);
    }
 }
 
@@ -21,7 +21,7 @@ function drag(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog.call (chessGame, err)
+	  console.log("board_doc_main:drag> " + err);
    };
 }
 
@@ -36,7 +36,7 @@ function drop(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog("drop error: " + err);
+	  console.log("board_doc_main:drop> " + err);
    }
 }
 
@@ -44,11 +44,11 @@ function cellClick(ev, chessGame)
 {
    try
    {
-      chessGame.BoardClick.call(chessGame, ev.target.id, true); //"this" reffers to cellClick owner, = the img element
+      chessGame.BoardClick.call(chessGame, ev.target.id, true);
    }
    catch (err)
    {
-      chessGame.insertLog.call(chessGame, "err: cellClick(): " + err);
+	  console.log("board_doc_main:cellClick> " + err);
    }
 }
 
@@ -65,8 +65,7 @@ function bodyKeyPress (ev, chessGame)
    }
    catch (err)
    {
-      alert (err);
-      chessGame.insertLog.call(chessGame, "err: cellClick(): " + err);
+      console.log("board_doc_main:bodyKeyPress> " + err);
    }
 }
 //TODO: check for compatibility with IE
@@ -77,34 +76,33 @@ function updateListeners(chessGame)
    try
    {
       //TODO: buttons to be added dynamically
-      document.body.addEventListener ('keydown', function (ev) {bodyKeyPress(ev, currentGame);}, false);
+      document.body.addEventListener ('keydown', (ev) => {bodyKeyPress(ev, currentGame);}, false);
 
-      document.getElementById ( 'btnFlipBoard'   ).addEventListener      ( 'click', function() {currentGame.btnFlipBoardListener.call(currentGame);},    false  );
-      document.getElementById ( 'btnInit'        ).addEventListener      ( 'click', function() {currentGame.btnInitListener.call(currentGame);},         false  );
-      document.getElementById ( 'btnMoveBack'    ).addEventListener      ( 'click', function() {currentGame.btnMoveBackListener.call(currentGame);},     false  );
-      document.getElementById ( 'btnMoveForward' ).addEventListener      ( 'click', function() {currentGame.btnMoveForwardListener.call(currentGame);},  false  );
-      document.getElementById ( 'btnMoveLast'    ).addEventListener      ( 'click', function() {currentGame.btnMoveLastListener.call(currentGame);},     false  );
-      document.getElementById ( 'btnGetFEN'      ).addEventListener      ( 'click', function() {currentGame.btnGetFENListener.call(currentGame);},       false  );
-      document.getElementById ( 'btnShowFENList' ).addEventListener      ( 'click', function() {currentGame.btnShowFENListListener.call(currentGame);},  false  );
-      document.getElementById ( 'btnPlay'        ).addEventListener      ( 'click', function() {currentGame.btnPlayListener.call(currentGame);},         false  );
+      document.getElementById ( 'btnFlipBoard'   ).addEventListener      ( 'click', () => {currentGame.btnFlipBoardListener.call(currentGame);},    false  );
+      document.getElementById ( 'btnInit'        ).addEventListener      ( 'click', () => {currentGame.btnInitListener.call(currentGame);},         false  );
+      document.getElementById ( 'btnMoveBack'    ).addEventListener      ( 'click', () => {currentGame.btnMoveBackListener.call(currentGame);},     false  );
+      document.getElementById ( 'btnMoveForward' ).addEventListener      ( 'click', () => {currentGame.btnMoveForwardListener.call(currentGame);},  false  );
+      document.getElementById ( 'btnMoveLast'    ).addEventListener      ( 'click', () => {currentGame.btnMoveLastListener.call(currentGame);},     false  );
+      document.getElementById ( 'btnGetFEN'      ).addEventListener      ( 'click', () => {currentGame.btnGetFENListener.call(currentGame);},       false  );
+      document.getElementById ( 'btnShowFENList' ).addEventListener      ( 'click', () => {currentGame.btnShowFENListListener.call(currentGame);},  false  );
+      document.getElementById ( 'btnPlay'        ).addEventListener      ( 'click', () => {currentGame.btnPlayListener.call(currentGame);},         false  );
 
       var celId = "";
       for (ii = 0; ii < 64; ii++)
       {
          cellId = "" + ii;
          cell = document.getElementById(cellId);
-         cell.addEventListener    ('click',     function (ev) {cellClick(ev, currentGame);}, false);
+         cell.addEventListener    ('click',     (ev) => {cellClick(ev, currentGame);}, false);
 
          //TODO: one more d&d handler may be needed here, as required by IE and maybe by Safari
-         cell.addEventListener    ('dragstart', function(ev){drag      (ev, currentGame);}, false);
-         cell.addEventListener    ('dragover',  function(ev){allowDrop (ev, currentGame);}, false);
-         cell.addEventListener    ('drop',      function(ev){drop      (ev, currentGame);}, false);
+         cell.addEventListener    ('dragstart', (ev) => {drag      (ev, currentGame);}, false);
+         cell.addEventListener    ('dragover',  (ev) => {allowDrop (ev, currentGame);}, false);
+         cell.addEventListener    ('drop',      (ev) => {drop      (ev, currentGame);}, false);
       }
    }
    catch (err)
    {
-      alert(err.description);
-      //don't rethrow "updateListeners(isFlipped=" + isFlipped + ")\n" + err ? err : "[NULLERROR]";
+      console.log("board_doc_main:updateListeners> " + err);
    }
 }
 
@@ -113,14 +111,13 @@ function board_doc_main (chessObject)
    var chessGame = null;
    try
    {
-      var errDiv = document.getElementById("error_div");  
+      var errDiv     = document.getElementById("error_div");  
       var chessBoard = document.getElementById('chess_board');
-      chessGame = new IVFChessGame (chessObject.imgPath + "/", chessObject.content, updateListeners, errDiv, chessBoard);
+      chessGame = new IVFChessGame (chessObject.imgPath + "/", chessObject.content, updateListeners, chessBoard);
 	  chessGame.variable_reset.call(chessGame);  //TODO: try less ctoring
    }
    catch (err)
    {
-      alert("main thread start error>>" + err);
-      chessGame.insertLog.call (chessGame, "err norethrow, main thread start: " + err);
+      console.log("board_doc_main:error> " + err);
    }
 }

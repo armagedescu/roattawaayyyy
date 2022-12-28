@@ -1,27 +1,51 @@
 //Google chrome specific script
 
-console.log("global> add context menus");
-var id      = chrome.contextMenus.create({"id":"Roatta Waaayyyy!!!",        "title": "Roatta waayyy!!!", "contexts":["selection", "page"]});
-var childId = chrome.contextMenus.create({"id":"Roatta Waaayyyy!!! small",  "title": "Play Small",       "contexts":["selection", "page"], "parentId": id}); //, "onClicked": menuCommandPlaySmallBoard});
-var childId = chrome.contextMenus.create({"id":"Roatta Waaayyyy!!! medium", "title": "Play Medium",      "contexts":["selection", "page"], "parentId": id}); //, "onClicked": menuCommandPlayMediumBoard});
-console.log("back.js:global> added context menus");
+console.log("enter global>");
+var idRoatta     = "Roatta Waaayyyy!!!";
+var idMiniBoard  = "Roatta Waaayyyy!!! small";
+var idMediuBoard = "Roatta Waaayyyy!!! medium";
+chrome.runtime.onInstalled.addListener(
 
-function menuCommandPlaySmallBoard (info)
+   (details)=>
+   {
+      console.log("on installing");
+      idRoatta      = chrome.contextMenus.create({"id":idRoatta,     "title": "Roatta waayyy!!!", "contexts":["selection", "page"]});
+      idMiniBoard   = chrome.contextMenus.create({"id":idMiniBoard,  "title": "Play Small",       "contexts":["selection", "page"], "parentId": idRoatta});
+      idMediuBoard  = chrome.contextMenus.create({"id":idMediuBoard, "title": "Play Medium",      "contexts":["selection", "page"], "parentId": idRoatta});
+      chrome.contextMenus.onClicked.addListener(menuItemClick);
+      console.log("on installed");
+   }
+)
+function menuItemClick(clickData, tab)
+{
+   console.log("menu item click id" + clickData.menuItemId);
+   switch (clickData.menuItemId)
+   {
+   case idMiniBoard:
+      menuCommandPlaySmallBoard  (clickData);
+      return;
+   case idMediuBoard:
+      menuCommandPlayMediumBoard (clickData);
+      return;
+   }
+   
+}
+function menuCommandPlaySmallBoard (clickData)
 {
    try
    {
-      playBoard   (info, "mini18", {url: "board.html", type:"popup", height : 350, width : 350});
+      playBoard   (clickData, "mini18", {url: "board.html", type:"popup", height : 350, width : 350});
    }
    catch (err)
    {
       console.log( "Error: menuCommandPlaySmallBoard()> " + err);
    }
 }
-function menuCommandPlayMediumBoard (info)
+function menuCommandPlayMediumBoard (clickData)
 {
    try
    {
-      playBoard   (info, "medium35", {url: "board.html", type:"popup", height: 450, width: 450});
+      playBoard   (clickData, "medium35", {url: "board.html", type:"popup", height: 450, width: 450});
    }
    catch (err)
    {
@@ -29,45 +53,33 @@ function menuCommandPlayMediumBoard (info)
    }
 }
 
-function onGameDataExchange(request, sender, sendResponse)
+function playBoard (clickData, imgPath, windowAttributes)
 {
-   return 'salut response';
-}
-
-chrome.contextMenus.onClicked.addListener((info, tab) =>
-{
-    console.log("menus.onClicked:menuId> "     + info.menuItemId);
-    console.log("menus.onClicked:selection> " + info.selectionText);
-    let imgPath = "", windowCreation = {};
-    if (info.menuItemId === "Roatta Waaayyyy!!! small")
-        menuCommandPlaySmallBoard (info);
-    else if (info.menuItemId === "Roatta Waaayyyy!!! medium")
-        menuCommandPlayMediumBoard (info);
-	console.log("menus.onClicked:menuId> end");
-});
-
-function playBoard (info, imgPath, windowAttributes)
-{
+   console.log("worker play board with: " + clickData.selectionText);
    try
    {
       let gameObject = {
                      chessObject:
                      {
                         gametype : "PGN_OR_FEN_board",
-                        content : info.selectionText,
+                        content : clickData.selectionText,
                         imgPath : imgPath
                      }
                   };
+
       let windowPromise = chrome.windows.create(windowAttributes);
-      windowPromise.then((value) => {
-        console.log("menus.Clicked.Listener:window.then> " + JSON.stringify(value));
-        chrome.runtime.onMessage.addListener(
-            (request, sender, sendResponse) =>
-            {
-              console.log("onMessage> " + gameObject.chessObject.content);
-              sendResponse(gameObject);
-            }
-          );
+      windowPromise.then((wnd) => {
+         chrome.runtime.onMessage.addListener (
+               function __playBoardCallback__ (request, sender, sendResponse)
+               {
+                  if (sender.tab?.id === wnd.tabs[0].id)
+                  {
+                     console.log("worker onMessage: " + JSON.stringify(request));
+                     chrome.runtime.onMessage.removeListener(__playBoardCallback__);
+                     sendResponse(gameObject);
+                  }
+               }
+            );
       });
 
    }

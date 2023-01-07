@@ -8,17 +8,17 @@ const roattaMenuInfo     =  {
                                [
                                   {
                                      id:"Roatta Waaayyyy!!! small",  title: "Play Small",
-                                     game: {imgPath: "mini18",   windowAttributes: {url: "board.html", type:"popup", height : 350, width : 350}}
+                                     game: {imgPath: "mini18",   windowAttributes: {url: "board.html", type:"popup", height: 350, width: 350}}
                                   },
                                   {
                                      id:"Roatta Waaayyyy!!! medium", title: "Play Medium",
-                                     game: {imgPath: "medium35", windowAttributes: {url: "board.html", type:"popup", height: 450,  width: 450}}
+                                     game: {imgPath: "medium35", windowAttributes: {url: "board.html", type:"popup", height: 450, width: 450}}
                                   }
                                ]
                             };
 
-chrome.runtime.onInstalled.addListener(
-
+chrome.runtime.onInstalled.addListener
+(
    (details)=>
    {
       console.log("on installing");
@@ -31,7 +31,9 @@ chrome.runtime.onInstalled.addListener(
       console.log("on installed");
    }
 );
-chrome.contextMenus.onClicked.addListener(
+
+chrome.contextMenus.onClicked.addListener
+(
    (clickData, tab) =>
    {
       console.log("menu item click id" + clickData.menuItemId);

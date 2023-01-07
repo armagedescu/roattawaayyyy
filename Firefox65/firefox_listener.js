@@ -2,8 +2,8 @@
 document.addEventListener('DOMContentLoaded',
    function (event)
    {
-      browser.runtime.sendMessage (  { chessObject: { gametype : "PGN_OR_FEN_board" } }  )
-	            .then
+      let chessPromise = browser.runtime.sendMessage (  { chessObject: { gametype : "PGN_OR_FEN_board" } }  );
+      chessPromise.then
                 (
                    (request) =>
                    {

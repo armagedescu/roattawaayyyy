@@ -9,7 +9,7 @@ function allowDrop(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog.call(chessGame, err);
+	  console.log("board_doc_main:allowDrop> " + err);
    }
 }
 
@@ -21,7 +21,7 @@ function drag(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog.call (chessGame, err)
+	  console.log("board_doc_main:drag> " + err);
    };
 }
 
@@ -36,7 +36,7 @@ function drop(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog("drop error: " + err);
+	  console.log("board_doc_main:drop> " + err);
    }
 }
 
@@ -48,7 +48,7 @@ function cellClick(ev, chessGame)
    }
    catch (err)
    {
-      chessGame.insertLog.call(chessGame, "err: cellClick(): " + err);
+	  console.log("board_doc_main:cellClick> " + err);
    }
 }
 
@@ -65,8 +65,7 @@ function bodyKeyPress (ev, chessGame)
    }
    catch (err)
    {
-      alert (err);
-      chessGame.insertLog.call(chessGame, "err: cellClick(): " + err);
+      console.log("board_doc_main:bodyKeyPress> " + err);
    }
 }
 //TODO: check for compatibility with IE
@@ -103,8 +102,7 @@ function updateListeners(chessGame)
    }
    catch (err)
    {
-      alert(err.description);
-      //don't rethrow "updateListeners(isFlipped=" + isFlipped + ")\n" + err ? err : "[NULLERROR]";
+      console.log("board_doc_main:updateListeners> " + err);
    }
 }
 
@@ -120,7 +118,6 @@ function board_doc_main (chessObject)
    }
    catch (err)
    {
-      alert("main thread start error>>" + err);
-      chessGame.insertLog.call (chessGame, "err norethrow, main thread start: " + err);
+      console.log("board_doc_main:error> " + err);
    }
 }

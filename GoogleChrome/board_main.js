@@ -113,7 +113,6 @@ function board_doc_main (chessObject)
    {
       var chessBoard = document.getElementById('chess_board');
       chessGame = new IVFChessGame (chessObject.imgPath + "/", chessObject.content, updateListeners, chessBoard);
-	  //chessGame.variable_reset();  //TODO: try less ctoring
    }
    catch (err)
    {

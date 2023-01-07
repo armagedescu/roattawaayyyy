@@ -1,59 +1,52 @@
 //Google chrome specific script
 
 console.log("enter global>");
-var idRoatta     = "Roatta Waaayyyy!!!";
-var idMiniBoard  = "Roatta Waaayyyy!!! small";
-var idMediuBoard = "Roatta Waaayyyy!!! medium";
+const contexts = ["selection", "page"];
+const roattaMenuInfo     =  {
+                               id: "Roatta Waaayyyy!!!",        title: "Roatta waayyy!!!",
+                               subMenus:
+                               [
+                                  {
+                                     id:"Roatta Waaayyyy!!! small",  title: "Play Small", roattaMenuInfo
+                                     game: {imgPath: "mini18",   windowAttributes: {url: "board.html", type:"popup", height : 350, width : 350}}
+                                  },
+                                  {
+                                     id:"Roatta Waaayyyy!!! medium", title: "Play Medium",
+                                     game: {imgPath: "medium35", windowAttributes: {url: "board.html", type:"popup", height: 450,  width: 450}}
+                                  }
+                               ]
+                            };
+
 chrome.runtime.onInstalled.addListener(
 
    (details)=>
    {
       console.log("on installing");
-      idRoatta      = chrome.contextMenus.create({"id":idRoatta,     "title": "Roatta waayyy!!!", "contexts":["selection", "page"]});
-      idMiniBoard   = chrome.contextMenus.create({"id":idMiniBoard,  "title": "Play Small",       "contexts":["selection", "page"], "parentId": idRoatta});
-      idMediuBoard  = chrome.contextMenus.create({"id":idMediuBoard, "title": "Play Medium",      "contexts":["selection", "page"], "parentId": idRoatta});
-      chrome.contextMenus.onClicked.addListener(menuItemClick);
+
+      chrome.contextMenus.create({"id":roattaMenuInfo.id, "title": roattaMenuInfo.title, "contexts": contexts});
+
+      for (let menu of roattaMenuInfo.subMenus)
+          chrome.contextMenus.create({id:menu.id, "title":menu.title, "contexts":contexts, "parentId": roattaMenuInfo.id})
+
       console.log("on installed");
    }
-)
-function menuItemClick(clickData, tab)
-{
-   console.log("menu item click id" + clickData.menuItemId);
-   switch (clickData.menuItemId)
+);
+chrome.contextMenus.onClicked.addListener(
+   (clickData, tab) =>
    {
-   case idMiniBoard:
-      menuCommandPlaySmallBoard  (clickData);
-      return;
-   case idMediuBoard:
-      menuCommandPlayMediumBoard (clickData);
-      return;
+      console.log("menu item click id" + clickData.menuItemId);
+      for (let menu of roattaMenuInfo.subMenus)
+      {
+         if (clickData.menuItemId === menu.id)
+         {
+            playBoard (clickData, menu.game);
+            return;
+         }
+      }
    }
-   
-}
-function menuCommandPlaySmallBoard (clickData)
-{
-   try
-   {
-      playBoard   (clickData, "mini18", {url: "board.html", type:"popup", height : 350, width : 350});
-   }
-   catch (err)
-   {
-      console.log( "Error: menuCommandPlaySmallBoard()> " + err);
-   }
-}
-function menuCommandPlayMediumBoard (clickData)
-{
-   try
-   {
-      playBoard   (clickData, "medium35", {url: "board.html", type:"popup", height: 450, width: 450});
-   }
-   catch (err)
-   {
-      console.log( "Error: menuCommandPlayMediumBoard()> " + err);
-   }
-}
+);
 
-function playBoard (clickData, imgPath, windowAttributes)
+function playBoard (clickData, game)
 {
    console.log("worker play board with: " + clickData.selectionText);
    try
@@ -63,11 +56,11 @@ function playBoard (clickData, imgPath, windowAttributes)
                      {
                         gametype : "PGN_OR_FEN_board",
                         content : clickData.selectionText,
-                        imgPath : imgPath
+                        imgPath : game.imgPath
                      }
                   };
 
-      let windowPromise = chrome.windows.create(windowAttributes);
+      let windowPromise = chrome.windows.create(game.windowAttributes);
       windowPromise.then((wnd) => {
          chrome.runtime.onMessage.addListener (
                function __playBoardCallback__ (request, sender, sendResponse)

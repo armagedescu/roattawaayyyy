@@ -7,7 +7,7 @@ const roattaMenuInfo     =  {
                                subMenus:
                                [
                                   {
-                                     id:"Roatta Waaayyyy!!! small",  title: "Play Small", roattaMenuInfo
+                                     id:"Roatta Waaayyyy!!! small",  title: "Play Small",
                                      game: {imgPath: "mini18",   windowAttributes: {url: "board.html", type:"popup", height : 350, width : 350}}
                                   },
                                   {

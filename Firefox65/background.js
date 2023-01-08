@@ -1,76 +1,85 @@
-{//Firefox
-   console.log("Creating context menus");
-   var id      = chrome.contextMenus.create({"title": "Roattta waayyy!!!!", "contexts":["selection", "page"]});
-   var childId = chrome.contextMenus.create({"title": "Play Small",         "contexts":["selection", "page"], "parentId": id, "onclick": menuCommandPlaySmallBoard});
-   var childId = chrome.contextMenus.create({"title": "Play Medium",        "contexts":["selection", "page"], "parentId": id, "onclick": menuCommandPlayMediumBoard});
-   console.log("Context menus created");
-}
+//Firefox specific script
 
-function menuCommandPlaySmallBoard (info, tab)
-{
-   try
+console.log("enter global>");
+const contexts = ["selection", "page"];
+const roattaMenuInfo     =  {
+                               id: "Roatta Waaayyyy!!!",        title: "Roatta waayyy!!!",
+                               subMenus:
+                               [
+                                  {
+                                     id:"Roatta Waaayyyy!!! small",  title: "Play Small",
+                                     game: {imgPath: "mini18",   windowAttributes: {url: "board.html", type:"popup", height: 350, width: 350}}
+                                  },
+                                  {
+                                     id:"Roatta Waaayyyy!!! medium", title: "Play Medium",
+                                     game: {imgPath: "medium35", windowAttributes: {url: "board.html", type:"popup", height: 450, width: 450}}
+                                  }
+                               ]
+                            };
+
+browser.runtime.onInstalled.addListener
+(
+   (details)=>
    {
-      playBoard   (info, tab, {height : 350, width : 350}, "mini18");
+      console.log("on installing");
+
+      chrome.contextMenus.create({"id":roattaMenuInfo.id, "title": roattaMenuInfo.title, "contexts": contexts});
+
+      for (let menu of roattaMenuInfo.subMenus)
+          chrome.contextMenus.create({id:menu.id, "title":menu.title, "contexts":contexts, "parentId": roattaMenuInfo.id})
+
+      console.log("on installed");
    }
-   catch (err)
-   {
-   }
-}
+);
 
-function menuCommandPlayMediumBoard (info, tab)
-{
-   try
+chrome.contextMenus.onClicked.addListener
+(
+   (clickData, tab) =>
    {
-       playBoard   (info, tab, {height : 450, width : 450}, "medium35");
-   }
-   catch (err)
-   {
-   }
-}
-
-function playBoard (info, tab, windowAttributes, imagePath)
-{
-   //let selection = info.selectionText;
-   var createData =
-   {
-      type  : "detached_panel",
-      url   : "board.html",
-      width : windowAttributes.width,
-      height: windowAttributes.height
-
-   };
-
-   let requestData =
+      console.log("menu item click id" + clickData.menuItemId);
+      for (let menu of roattaMenuInfo.subMenus)
       {
-         chessObject:
+         if (clickData.menuItemId === menu.id)
          {
-            gametype : "PGN_OR_FEN_board",
-            content :  info.selectionText,
-            imgPath : imagePath
+            playBoard (clickData, menu.game);
+            return;
          }
-      };
+      }
+   }
+);
+
+function playBoard (clickData, game)
+{
+   console.log("worker play board with: " + clickData.selectionText);
    try
    {
-      console.log ("Play Board: " + imagePath);
-      console.log ("Selection: " + info.selectionText);
+      let gameObject = {
+                     chessObject:
+                     {
+                        gametype : "PGN_OR_FEN_board",
+                        content : clickData.selectionText,
+                        imgPath : game.imgPath
+                     }
+                  };
 
-      let creating = browser.windows.create(createData);
-      
-      function onGameDataExchange(request)
-      {
-          browser.runtime.onMessage.removeListener(onGameDataExchange);
-          return Promise.resolve(requestData);
-      }
-
-      browser.runtime.onMessage.addListener (onGameDataExchange);
-
-      console.log ("opened board.html");
+      let windowPromise = browser.windows.create(game.windowAttributes);
+      windowPromise.then((wnd) => {
+         browser.runtime.onMessage.addListener (
+               function __playBoardCallback__ (request, sender, sendResponse)
+               {
+                  if (sender.tab?.id === wnd.tabs[0].id)
+                  {
+                     console.log("worker onMessage: " + JSON.stringify(request));
+                     browser.runtime.onMessage.removeListener(__playBoardCallback__);
+                     sendResponse(gameObject);
+                  }
+               }
+            );
+      });
 
    }
    catch (err)
    {
-      console.log ("error, not opened");
-      console.log ("main background playBoard()> " + err);
-      throw "main background playBoard()> " + err;
+      console.log( "Error: playBoard()> " + err);
    }
 }

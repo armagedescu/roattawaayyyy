@@ -62,12 +62,12 @@ class IVFChessGame
 //}end events
 
     //TODO: get rid of this
-	constructor (imgPath, chessContent, listenerUpdater, chessBoard)
-	{
+    constructor (imgPath, chessContent, listenerUpdater, chessBoard)
+    {
 
 
        this.xdocument = new xdocument_gen();  //document stub/simulator TODO: to remove
-	   this.ChessPiece = //static
+       this.ChessPiece = //static
           {
              Pos:
              {
@@ -90,19 +90,19 @@ class IVFChessGame
        //public:
        this.inverse = 0;
        this.board =
-	      {
+          {
                  gameTBodyElement:  null,
                  IMGNumersElement:  null,
                  IMGLettersElement: null,
                  IMGFlipElement:    null
-	      };
+          };
        this.ImgResourcePath = imgPath;
        this.chess_board = chessBoard; //TODO: not used
 
        //private:
-	   this.contentSelectedText = chessContent; //readonly
+       this.contentSelectedText = chessContent; //readonly
        this.ScriptPath       = "http://www.lutanho.net/pgn/";
-       const MaxMove          = 500;
+       this.MaxMove          = 500;
        //var isInit           = false;
        this.isCalculating    = false;
        this.StartMove        = null;
@@ -137,7 +137,7 @@ class IVFChessGame
        this.BorderColor      = "#404040";
        this.ScoreSheet       = 0;
        this.BGColor          = "";
-       this.isRecording      = false;
+       this.isRecording      = false; //Drag&Drop
        this.isNullMove       = true;
        this.RecordCount      = 0;
        this.RecordedMoves    = "";
@@ -152,7 +152,7 @@ class IVFChessGame
        this.PieceName        = "KQRBNP";
        this.StandardFen      = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
        this.ColorName = ["w", "b", "t"];
-       this.HalfMove = new Array(MaxMove + 1);
+       this.HalfMove = new Array(this.MaxMove + 1);
 
        this.ShowPieceName    = "KQRBNP";
 
@@ -171,14 +171,14 @@ class IVFChessGame
        this.Castling  = [new Array(2), new Array(2)];
        this.Board     = [new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8)];
 
-       this.EnPass = new Array(MaxMove + 1);
+       this.EnPass = new Array(this.MaxMove + 1);
 
-       this.HistMove = new Array(MaxMove);
-       this.HistCommand = new Array(MaxMove+1);
-       this.HistPiece = [new Array(MaxMove), new Array(MaxMove)];
-       this.HistType  = [new Array(MaxMove), new Array(MaxMove)];
-       this.HistPosX  = [new Array(MaxMove), new Array(MaxMove)];
-       this.HistPosY  = [new Array(MaxMove), new Array(MaxMove)];
+       this.HistMove = new Array(this.MaxMove);
+       this.HistCommand = new Array(this.MaxMove+1);
+       this.HistPiece = [new Array(this.MaxMove), new Array(this.MaxMove)];
+       this.HistType  = [new Array(this.MaxMove), new Array(this.MaxMove)];
+       this.HistPosX  = [new Array(this.MaxMove), new Array(this.MaxMove)];
+       this.HistPosY  = [new Array(this.MaxMove), new Array(this.MaxMove)];
 
        this.MoveArray = new Array();
 
@@ -189,8 +189,6 @@ class IVFChessGame
 
 
 ////   ///////////////////////////////////////////
-       this.timeProcessor = new timerWrapper(this);
-
        this.dragPiece[0] = -1;
        this.dragPiece[4] = -1;
 
@@ -202,7 +200,7 @@ class IVFChessGame
 
        this.boardWriter (() => {listenerUpdater(this);});
        this.startParsingDetect_FEN_PGN (); //TODO: too many initialization functions
-	}
+    }
 
     SetImagePath  (imgPath)//public
     {
@@ -776,7 +774,7 @@ class IVFChessGame
     SetAutoPlay (bb) //try private
     {
        this.isAutoPlay = bb;
-       if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
+       if (this.AutoPlayInterval) clearTimeout(this.AutoPlayInterval);
        if (this.isAutoPlay)
        {
           if ((document.BoardForm)&&(document.BoardForm.AutoPlay))
@@ -817,7 +815,7 @@ class IVFChessGame
           if (!this.isRecording) return;
           //if (this.isAutoPlay)
           this.SetAutoPlay(false);//TODO: to remove if, let just SetAutoPlay
-          if (this.MoveCount == MaxMove) return;
+          if (this.MoveCount == this.MaxMove) return;
           if (this.BoardClickMove (nn)) return;
           if (this.isDragDrop && (!bb)) return; //TODO: don't allow first click while drag & drop?
 
@@ -836,7 +834,7 @@ class IVFChessGame
              {
                 mm="---";
                 if ((this.xdocument.BoardForm)&&(this.xdocument.BoardForm.PgnMoveText))
-                   this.ShortPgnMoveText[0][this.CurVar]=Uncomment(this.xdocument.BoardForm.PgnMoveText.value);
+                   this.ShortPgnMoveText[0][this.CurVar]=this.Uncomment(this.xdocument.BoardForm.PgnMoveText.value);
                 ssearch=Math.floor(this.MoveCount/2+1)+".";
                 ffst=this.ShortPgnMoveText[0][this.CurVar].indexOf(ssearch);
                 if (ffst>=0)
@@ -851,7 +849,7 @@ class IVFChessGame
                 {
                    if ((vv==this.CurVar)||((this.ShortPgnMoveText[1][vv]==this.CurVar)&&(this.ShortPgnMoveText[2][vv]==this.MoveCount)))
                    {
-                      ffull=Uncomment(this.ShortPgnMoveText[0][vv]);
+                      ffull=this.Uncomment(this.ShortPgnMoveText[0][vv]);
                       ssearch=Math.floor(this.MoveCount/2+2)+".";
                       llst=ffull.indexOf(ssearch);
                       ssearch=Math.floor(this.MoveCount/2+1)+".";
@@ -884,7 +882,7 @@ class IVFChessGame
                          {
                             this.SetMove(this.MoveCount+1, vv);
                             vv=this.ShortPgnMoveText[0].length+1;
-                            if (window.UserMove) setTimeoutStub("UserMove(1,'"+mmove0+"')",this.Delay/2, this);
+                            //if (window.UserMove) setTimeout("UserMove(1,'"+mmove0+"')",this.Delay/2, this); //TODO: review and remove
                          }
                       }
                    }
@@ -900,7 +898,7 @@ class IVFChessGame
                       this.CurVar=vv;
                    }
                    this.ParseMove(mm,true);
-                   if (window.UserMove) setTimeoutStub("UserMove(0,'"+mm+"')",this.Delay/2, this);
+                   //if (window.UserMove) setTimeout("UserMove(0,'"+mm+"')",this.Delay/2, this); //TODO: review and remove
                    if (this.MoveType==0)
                    {
                       this.HistMove[this.MoveCount-this.StartMove]=Math.floor((this.MoveCount+2)/2)+"."+mm;
@@ -912,14 +910,14 @@ class IVFChessGame
                       if (this.MoveCount==this.StartMove) ssub+=Math.floor((this.MoveCount+2)/2)+". ... ";
                       else ssub+=this.HistMove[this.MoveCount-this.StartMove-1]+" ";
                    }
-                   if (this.RecordCount==0) RecordedMoves=this.HistMove[this.MoveCount-this.StartMove];
+                   if (this.RecordCount==0) this.RecordedMoves=this.HistMove[this.MoveCount-this.StartMove];
                    else
                    {
-                      ttmp=RecordedMoves.split(" ");
+                      ttmp=this.RecordedMoves.split(" ");
                       ttmp.length=this.RecordCount+((this.MoveCount-this.RecordCount)%2)*2;
-                      RecordedMoves=ttmp.join(" ");
-                      if (this.MoveType==0) RecordedMoves+=" "+this.HistMove[this.MoveCount-this.StartMove];
-                      else RecordedMoves+=" "+mm;
+                      this.RecordedMoves=ttmp.join(" ");
+                      if (this.MoveType==0) this.RecordedMoves+=" "+this.HistMove[this.MoveCount-this.StartMove];
+                      else this.RecordedMoves+=" "+mm;
                    }
                    this.RecordCount++;
                    this.MoveCount++;
@@ -968,7 +966,7 @@ class IVFChessGame
              }
           }
           if ((this.xdocument.BoardForm)&&(this.xdocument.BoardForm.PgnMoveText))
-             this.ShortPgnMoveText[0][this.CurVar]=Uncomment(this.xdocument.BoardForm.PgnMoveText.value);
+             this.ShortPgnMoveText[0][this.CurVar]=this.Uncomment(this.xdocument.BoardForm.PgnMoveText.value);
           ssearch=Math.floor(this.MoveCount/2+1)+".";
           ffst=this.ShortPgnMoveText[0][this.CurVar].indexOf(ssearch);
           if (ffst>=0)
@@ -1014,7 +1012,7 @@ class IVFChessGame
           {
              if ((vv==this.CurVar)||((this.ShortPgnMoveText[1][vv]==this.CurVar)&&(this.ShortPgnMoveText[2][vv]==this.MoveCount)))
              {
-                ffull=Uncomment(this.ShortPgnMoveText[0][vv]);
+                ffull=this.Uncomment(this.ShortPgnMoveText[0][vv]);
                 ssearch=Math.floor(this.MoveCount/2+2)+".";
                 llst=ffull.indexOf(ssearch);
                 ssearch=Math.floor(this.MoveCount/2+1)+".";
@@ -1048,7 +1046,7 @@ class IVFChessGame
                    if ((mmove0.indexOf(mm)==0)&&(mmove0.indexOf(mm+mm.substr(1))!=0))
                    {
                       this.SetMove(this.MoveCount+1, vv);
-                      if (window.UserMove) setTimeoutStub("UserMove(1,'"+mmove0+"')",this.Delay/2, this);
+                      //if (window.UserMove) setTimeout("UserMove(1,'"+mmove0+"')",this.Delay/2, this); //TODO: review and remove
                       return;
                    }
                 }
@@ -1064,7 +1062,7 @@ class IVFChessGame
           }
           this.ParseMove(mm, true);
           if (this.IsCheck(this.Piece[1-this.MoveType][0].Pos.X, this.Piece[1-this.MoveType][0].Pos.Y, 1-this.MoveType)) mm+="+";
-          if (window.UserMove) setTimeoutStub("UserMove(0,'"+mm+"')",this.Delay/2, this);
+          //if (window.UserMove) setTimeout("UserMove(0,'"+mm+"')",this.Delay/2, this); //TODO: review and remove
           if (this.MoveType==0)
           {
              this.HistMove[this.MoveCount-this.StartMove]=Math.floor((this.MoveCount+2)/2)+"."+mm;
@@ -1076,14 +1074,14 @@ class IVFChessGame
              if (this.MoveCount==this.StartMove) ssub+=Math.floor((this.MoveCount+2)/2)+". ... ";
              else ssub+=this.HistMove[this.MoveCount-this.StartMove-1]+" ";
           }
-          if (this.RecordCount==0) RecordedMoves=this.HistMove[this.MoveCount-this.StartMove];
+          if (this.RecordCount==0) this.RecordedMoves=this.HistMove[this.MoveCount-this.StartMove];
           else
           {
-             ttmp=RecordedMoves.split(" ");
+             ttmp=this.RecordedMoves.split(" ");
              ttmp.length=this.RecordCount+((this.MoveCount-this.RecordCount)%2)*2;
-             RecordedMoves=ttmp.join(" ");
-             if (this.MoveType==0) RecordedMoves+=" "+this.HistMove[this.MoveCount-this.StartMove];
-             else RecordedMoves+=" "+mm;
+             this.RecordedMoves=ttmp.join(" ");
+             if (this.MoveType==0) this.RecordedMoves+=" "+this.HistMove[this.MoveCount-this.StartMove];
+             else this.RecordedMoves+=" "+mm;
           }
           this.RecordCount++;
           this.MoveCount++;
@@ -1385,13 +1383,13 @@ class IVFChessGame
     //  if (ffile) ss=" "+ffile;
     //  else
     //  { if (! parent.frames[1].document.documentElement)
-    //    { if (nn>-50) setTimeoutStub("ParsePgn("+(nn-5)+",'"+gg+"')",400, this);
+    //    { if (nn>-50) setTimeout("ParsePgn("+(nn-5)+",'"+gg+"')",400, this);
     //      return;
     //    }
     //    ss=parent.frames[1].document.documentElement.innerHTML;
     //    if (ss!="") ll=ss.length;
     //    if (ll!=nn)
-    //    { setTimeoutStub("ParsePgn("+ll+",'"+gg+"')",400, this);
+    //    { setTimeout("ParsePgn("+ll+",'"+gg+"')",400, this);
     //      return;
     //    }
     //    if (ll==0) return;
@@ -1537,7 +1535,7 @@ class IVFChessGame
     //  dd.writeln("      return;");
     //  dd.writeln("    }");
     //  dd.writeln("  }");
-    //  dd.writeln("  setTimeoutStub('OpenGame('+nn+')',400);", this);
+    //  dd.writeln("  setTimeout('OpenGame('+nn+')',400);", this);
     //  dd.writeln("}");
     //  dd.writeln("function SetMove(mm,vv){ if (parent.frames[0].SetMove) parent.frames[0].SetMove(mm,vv); }");
     //  if (jj>1)
@@ -1592,10 +1590,10 @@ class IVFChessGame
     //    dd.writeln("}");
     //  }
     //  dd.writeln("</"+"script>");
-    //  if (jj==1) dd.writeln("</head><body onLoad=\"setTimeoutStub('OpenGame(0)',400)\">");
+    //  if (jj==1) dd.writeln("</head><body onLoad=\"setTimeout('OpenGame(0)',400)\">");
     //  else
     //  { if (ParseType<3)
-    //    { if (parseInt(gg)<jj) dd.writeln("</head><body onLoad=\"setTimeoutStub('OpenGame("+gg+")',400)\">");
+    //    { if (parseInt(gg)<jj) dd.writeln("</head><body onLoad=\"setTimeout('OpenGame("+gg+")',400)\">");
     //      else dd.writeln("</head><body>");
     //      dd.writeln("<FORM onSubmit='return SearchGame()'><NOBR><SELECT name='GameList' onChange='OpenGame(this.options[selectedIndex].value)' SIZE=1>");
     //      dd.writeln("<OPTION VALUE=-1>Select a game !");
@@ -1700,7 +1698,7 @@ class IVFChessGame
     //         if (      (   (nn) || (document.BoardForm.Url.value.indexOf(".htm") > 0)   ) && (!document.layers)       )
     //         {
     //            parent.frames[1].location.href = document.BoardForm.Url.value;
-    //            if (nn) setTimeoutStub("ParsePgn(" + nn + ")", 400, this);
+    //            if (nn) setTimeout("ParsePgn(" + nn + ")", 400, this);
     //         }
     //         else parent.frames[1].location.href = "pgnframe.html?" + document.BoardForm.Url.value;
     //      }
@@ -1710,7 +1708,7 @@ class IVFChessGame
 
     GetHTMLMoveText (vvariant, nnoscript, ccommenttype, sscoresheet)
     { let vv=0, tt, ii, uu="", uuu="", cc, bb=0, bbb=0;
-      let ss="", sstart=0, nn=MaxMove, ffst=0,llst,ssearch,ssub,ffull,mmove0="",mmove1="", gg="";
+      let ss="", sstart=0, nn=this.MaxMove, ffst=0,llst,ssearch,ssub,ffull,mmove0="",mmove1="", gg="";
       if (sscoresheet) this.Annotation.length=0;
       if (startAnchor!=-1) gg=",'"+startAnchor+"'";
       this.isCalculating=true;
@@ -1728,11 +1726,11 @@ class IVFChessGame
         if (this.MoveCount!=this.ShortPgnMoveText[2][vv]) return(this.ShortPgnMoveText[0][vv]);
         this.CurVar=vvariant;
       }
-      else this.MoveBack(MaxMove);
+      else this.MoveBack(this.MaxMove);
       tt=this.ShortPgnMoveText[0][vv];
 
-      ffull=Uncomment(this.ShortPgnMoveText[0][this.CurVar]);
-      for (ii=0; (ii<nn)&&(ffst>=0)&&(this.MoveCount<MaxMove); ii++)
+      ffull=this.Uncomment(this.ShortPgnMoveText[0][this.CurVar]);
+      for (ii=0; (ii<nn)&&(ffst>=0)&&(this.MoveCount<this.MaxMove); ii++)
       { ssearch=Math.floor(this.MoveCount/2+2)+".";
         llst=ffull.indexOf(ssearch);
         ssearch=Math.floor(this.MoveCount/2+1)+".";
@@ -1974,8 +1972,8 @@ class IVFChessGame
        }
        if (this.TargetDocument) this.HighlightMove("m" + this.MoveCount + "v" + this.CurVar);
        this.UpdateAnnotation(false);
-       if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
-       if (this.isAutoPlay) this.AutoPlayInterval=setTimeoutStub("MoveBack("+nn+")", this.Delay, this);
+       if (this.AutoPlayInterval) clearTimeout(this.AutoPlayInterval);
+       if (this.isAutoPlay) this.AutoPlayInterval = setTimeout((moveNum) => {this.MoveBack (moveNum);}, this.Delay, moveNum);
        this.UpdateBoardAndPieceImages();
     }
 
@@ -2102,9 +2100,9 @@ class IVFChessGame
           }
           if (this.TargetDocument) this.HighlightMove("m" + this.MoveCount + "v" + this.CurVar);
           this.UpdateAnnotation(false);
-          if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
-          let this_ref = this; //save, because this will change in context of lambda function
-          if (this.isAutoPlay) this.AutoPlayInterval = setTimeoutStub(function(){this_ref.MoveForward(nMoveNumber);}, this.Delay, this);
+          if (this.AutoPlayInterval) clearTimeout(this.AutoPlayInterval);
+          //let this_ref = this; //save, because this will change in context of lambda function
+          if (this.isAutoPlay) this.AutoPlayInterval = setTimeout((moveNumber) => {this.MoveForward(moveNumber);}, this.Delay, nMoveNumber);
           this.UpdateBoardAndPieceImages();
        }catch(e)
        {
@@ -3171,7 +3169,7 @@ class IVFChessGame
       }
       if (! isNaN(rroot))
       { ii=0, jj=0, bb=0;
-        let uuc=Uncomment(uu);
+        let uuc=this.Uncomment(uu);
         while ((ii<uuc.length-1)&&(((ii>0)&&(uuc.charAt(ii-1)!=" "))||(isNaN(parseInt(uuc.charAt(ii)))))) ii++;
         while ((ii<uuc.length-1)&&(! isNaN(parseInt(uuc.charAt(ii))))) { bb=10*bb+parseInt(uuc.charAt(ii)); ii++; }
         if (ii<uuc.length-1)
@@ -3629,7 +3627,7 @@ class IVFChessGame
 
           if (hh);
           else this.HistCommand[this.MoveCount - this.StartMove] = this.NewCommands.join("|");
-          setTimeoutStub(function(){this.ExecCommands()}, 100, this);
+          setTimeout(() => {this.ExecCommands();}, 100);
 
           return;
        }
@@ -3897,7 +3895,7 @@ class IVFChessGame
     { if (isNaN(mmove)) return;
       let ii=this.isCalculating;
       this.isCalculating=true;
-      if (this.RecordCount>0) this.MoveBack(MaxMove);
+      if (this.RecordCount>0) this.MoveBack(this.MaxMove);
       if (vvariant)
       { if (vvariant>=this.ShortPgnMoveText[0].length) { this.isCalculating=ii; return; }
         if (this.CurVar!=vvariant)
@@ -3917,13 +3915,13 @@ class IVFChessGame
       }
       this.isCalculating=ii;
       let dd=mmove-this.MoveCount;
-      if (dd<=0) this.MoveBack(-dd);
+      if (dd <= 0) this.MoveBack(-dd);
       else this.MoveForward(dd, 1);
       if (this.isCalculating) return;
       if ((document.BoardForm)&&(document.BoardForm.PgnMoveText))
         document.BoardForm.PgnMoveText.value=this.ShortPgnMoveText[0][this.CurVar];
-      if (this.AutoPlayInterval) clearTimeoutStub(this.AutoPlayInterval, this);
-      if (this.isAutoPlay) this.AutoPlayInterval=setTimeoutStub(function(){this.MoveForward(1);}, this.Delay, this);
+      if (this.AutoPlayInterval) clearTimeout(this.AutoPlayInterval);
+      if (this.isAutoPlay) this.AutoPlayInterval = setTimeout((moveNum) => {this.MoveForward(moveNum);}, this.Delay, 1);
     }
 
     UpdateAnnotation (bb)
@@ -4526,8 +4524,8 @@ class IVFChessGame
         }
         dragImg[pp%3].style.left=(Math.round((nn%mm)*(this.dragPiece[pp+2]-this.dragPiece[pp+0])/(mm-1))+dragImgBorder)+"px";
         dragImg[pp%3].style.top=(Math.round((nn%mm)*(this.dragPiece[pp+3]-this.dragPiece[pp+1])/(mm-1))+dragImgBorder)+"px";
-        if ((this.dragPiece[4]>=0)&&(mm-1==nn)) setTimeoutStub("AnimateBoard("+(mm+1)+")",50, this);
-        else setTimeoutStub("AnimateBoard("+(nn+1)+")",50, this);
+        if ((this.dragPiece[4]>=0)&&(mm-1==nn)) setTimeout ((x) => {this.AnimateBoard (x);}, 50, mm + 1);
+        else setTimeout((x) => {this.AnimateBoard (x);}, 50, nn + 1);
         return;
       }
       this.RefreshBoard();
@@ -4561,7 +4559,7 @@ class IVFChessGame
           return;
         }
       }
-      setTimeoutStub('OpenGame('+nn+')', 400, this);
+      setTimeout((x) => {this.OpenGame (x);}, 400, nn);
     }
 
     //TODO: make it regexp

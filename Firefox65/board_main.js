@@ -9,7 +9,7 @@ function allowDrop(ev, chessGame)
    }
    catch (err)
    {
-	  console.log("board_doc_main:allowDrop> " + err);
+      console.log("board_doc_main:allowDrop> " + err);
    }
 }
 
@@ -21,7 +21,7 @@ function drag(ev, chessGame)
    }
    catch (err)
    {
-	  console.log("board_doc_main:drag> " + err);
+      console.log("board_doc_main:drag> " + err);
    };
 }
 
@@ -30,13 +30,13 @@ function drop(ev, chessGame)
    try
    {
       ev.preventDefault(); //TODO: check if need to prevent default
-      var data = ev.dataTransfer.getData("Text");  //let's keep in source/target communication style
+      let data = ev.dataTransfer.getData("Text");  //let's keep in source/target communication style
       chessGame.BoardClick (data,         true); //move from.id, d&d source
       chessGame.BoardClick (ev.target.id, true); //move to.id, d&d target
    }
    catch (err)
    {
-	  console.log ("board_doc_main:drop> " + err);
+      console.log ("board_doc_main:drop> " + err);
    }
 }
 
@@ -48,7 +48,7 @@ function cellClick(ev, chessGame)
    }
    catch (err)
    {
-	  console.log ("board_doc_main:cellClick> " + err);
+      console.log ("board_doc_main:cellClick> " + err);
    }
 }
 
@@ -72,7 +72,7 @@ function bodyKeyPress (ev, chessGame)
 //TODO: move browser specific message handlers and listeners to browser_listener.js
 function updateListeners(chessGame)
 {
-   var currentGame = chessGame;
+   let currentGame = chessGame;
    try
    {
       //TODO: buttons to be added dynamically
@@ -87,11 +87,12 @@ function updateListeners(chessGame)
       document.getElementById ( 'btnShowFENList' ).addEventListener      ( 'click', () => {currentGame.btnShowFENListListener();},  false  );
       document.getElementById ( 'btnPlay'        ).addEventListener      ( 'click', () => {currentGame.btnPlayListener();       },  false  );
 
-      var celId = "";
+      let celId = "";
       for (ii = 0; ii < 64; ii++)
       {
          cellId = "" + ii;
-         cell = document.getElementById(cellId);
+
+         let cell = document.getElementById(cellId);
          cell.addEventListener    ('click',     (ev) => {cellClick (ev, currentGame);}, false);
 
          //TODO: one more d&d handler may be needed here, as required by IE and maybe by Safari
@@ -108,10 +109,10 @@ function updateListeners(chessGame)
 
 function board_doc_main (chessObject)
 {
-   var chessGame = null;
+   let chessGame = null;
    try
    {
-      var chessBoard = document.getElementById('chess_board');
+      let chessBoard = document.getElementById('chess_board');
       chessGame = new IVFChessGame (chessObject.imgPath + "/", chessObject.content, updateListeners, chessBoard);
    }
    catch (err)

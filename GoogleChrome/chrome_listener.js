@@ -3,10 +3,10 @@
 
 // chrome bridge to board_doc_main
 document.addEventListener('DOMContentLoaded',
-   async (event) =>
+   (event) =>
    {
       let chessPromise = chrome.runtime.sendMessage(null, { chessObject: { gametype : "PGN_OR_FEN_board" } });
-	  chessPromise.then((val)=>
+      chessPromise.then((val)=>
       {
          console.log("response> " + JSON.stringify(val));
          board_doc_main(val.chessObject);
@@ -15,14 +15,3 @@ document.addEventListener('DOMContentLoaded',
       console.log("Popup DOMContentLoaded send message end");
    }
 );
-
-//FF requires nsITimer
-//all other browsers will use standard mechanism,
-//with Stub aliases, for portability
-
-var clearTimeoutStub = clearTimeout;
-var setTimeoutStub   = setTimeout;
-
-//Event Wrapper for event interface, firefox only
-//Stub, for compatibility with Firefox
-function timerWrapper () {}

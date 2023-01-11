@@ -15,14 +15,3 @@ document.addEventListener('DOMContentLoaded',
       console.log("Popup DOMContentLoaded send message end");
    }
 );
-
-//FF requires nsITimer
-//all other browsers will use standard mechanism,
-//with Stub aliases, for portability
-
-var clearTimeoutStub = clearTimeout;
-var setTimeoutStub   = setTimeout;
-
-//Event Wrapper for event interface, firefox only
-//Stub, for compatibility with Firefox
-function timerWrapper () {}
